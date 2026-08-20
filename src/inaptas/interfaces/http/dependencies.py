@@ -4,6 +4,7 @@ import secrets
 from typing import Annotated, cast
 
 from fastapi import Header, HTTPException, Request, status
+from redis.exceptions import RedisError
 
 from inaptas.application.services import FiscalGatewayService
 from inaptas.config import Settings
@@ -38,3 +39,24 @@ async def exigir_token_interno(
     recebido = authorization.removeprefix("Bearer ").strip() if authorization else ""
     if not esperado or not secrets.compare_digest(recebido, esperado):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autorizado")
+
+
+async def exigir_rate_limit(
+    request: Request,
+    authorization: Annotated[str | None, Header()] = None,
+) -> None:
+    settings: Settings = request.app.state.settings
+    if not settings.rate_limit_enabled:
+        return
+    identificador = authorization or request.client.host if request.client else "desconhecido"
+    try:
+        permitido = await request.app.state.redis_store.permitir_rate_limit(
+            f"rate:{identificador}",
+            limite=settings.internal_rate_limit,
+            janela_segundos=settings.rate_limit_window_seconds,
+        )
+    except RedisError as exc:
+        request.app.state.health_state.definir("redis", "unavailable")
+        raise HTTPException(status_code=503, detail="Rate limit indisponível") from exc
+    if not permitido:
+        raise HTTPException(status_code=429, detail="Limite de consultas excedido")

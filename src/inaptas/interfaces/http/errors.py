@@ -21,7 +21,11 @@ async def tratar_cnpj_invalido(request: Request, exc: Exception) -> JSONResponse
 
 async def tratar_http_exception(request: Request, exc: Exception) -> JSONResponse:
     http_exception = cast(HTTPException, exc)
-    code = "unauthorized" if http_exception.status_code == 401 else "http_error"
+    code = {
+        401: "unauthorized",
+        429: "rate_limit_exceeded",
+        503: "dependency_unavailable",
+    }.get(http_exception.status_code, "http_error")
     message = (
         "Não autorizado."
         if http_exception.status_code == 401

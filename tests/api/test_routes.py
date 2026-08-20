@@ -1,9 +1,11 @@
 from datetime import UTC, datetime
 
+from fakeredis.aioredis import FakeRedis
 from fastapi.testclient import TestClient
 
 from inaptas.config import Settings
 from inaptas.domain.cnpj import CnpjInvalidoError, normalizar_cnpj
+from inaptas.infrastructure.cache.redis_store import RedisStore
 from inaptas.interfaces.http.schemas import FiscalResponse
 from inaptas.main import create_app
 
@@ -32,6 +34,7 @@ def _cliente() -> TestClient:
         app_env="test",
         internal_api_token="token-teste",
         trusted_hosts=["testserver"],
+        rate_limit_enabled=False,
     )
     return TestClient(create_app(settings=configuracao, service=ServicoFalso()))
 
@@ -71,3 +74,28 @@ def test_cnpj_invalido_retorna_erro_estavel() -> None:
 
     assert resposta.status_code == 422
     assert resposta.json()["error"]["code"] == "invalid_cnpj"
+
+
+def test_rate_limit_bloqueia_excesso_de_consultas() -> None:
+    configuracao = Settings(
+        app_env="test",
+        internal_api_token="token-teste",
+        trusted_hosts=["testserver"],
+        internal_rate_limit=1,
+        rate_limit_window_seconds=60,
+    )
+    app = create_app(settings=configuracao, service=ServicoFalso())
+    app.state.redis_store = RedisStore(FakeRedis())
+    cliente = TestClient(app)
+    cabecalho = {"Authorization": "Bearer token-teste"}
+
+    primeira = cliente.post(
+        "/v1/company/lookup", headers=cabecalho, json={"cnpj": "11222333000181"}
+    )
+    segunda = cliente.post(
+        "/v1/company/lookup", headers=cabecalho, json={"cnpj": "11222333000181"}
+    )
+
+    assert primeira.status_code == 200
+    assert segunda.status_code == 429
+    assert segunda.json()["error"]["code"] == "rate_limit_exceeded"

@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     dify_base_url: str = ""
     dify_api_key: str = ""
     dify_timeout_seconds: float = 10.0
+    rate_limit_enabled: bool = True
+    internal_rate_limit: int = 60
+    rate_limit_window_seconds: int = 60
     trusted_hosts: list[str] = ["localhost", "127.0.0.1"]
     openapi_enabled: bool = True
 

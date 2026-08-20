@@ -9,7 +9,11 @@ from starlette.responses import PlainTextResponse
 
 from inaptas.application.services import FiscalGatewayService
 from inaptas.infrastructure.integrations.webhooks import extrair_evento_id
-from inaptas.interfaces.http.dependencies import exigir_token_interno, obter_servico
+from inaptas.interfaces.http.dependencies import (
+    exigir_rate_limit,
+    exigir_token_interno,
+    obter_servico,
+)
 from inaptas.interfaces.http.schemas import CompanyLookupRequest, FiscalResponse
 
 
@@ -29,7 +33,7 @@ def criar_router() -> APIRouter:
     @router.post(
         "/v1/company/lookup",
         response_model=FiscalResponse,
-        dependencies=[Depends(exigir_token_interno)],
+        dependencies=[Depends(exigir_token_interno), Depends(exigir_rate_limit)],
     )
     async def lookup(
         payload: CompanyLookupRequest,
@@ -40,7 +44,7 @@ def criar_router() -> APIRouter:
     @router.post(
         "/v1/company/fiscal-status",
         response_model=FiscalResponse,
-        dependencies=[Depends(exigir_token_interno)],
+        dependencies=[Depends(exigir_token_interno), Depends(exigir_rate_limit)],
     )
     async def fiscal_status(
         payload: CompanyLookupRequest,
@@ -51,7 +55,7 @@ def criar_router() -> APIRouter:
     @router.post(
         "/v1/company/pgfn",
         response_model=FiscalResponse,
-        dependencies=[Depends(exigir_token_interno)],
+        dependencies=[Depends(exigir_token_interno), Depends(exigir_rate_limit)],
     )
     async def pgfn(
         payload: CompanyLookupRequest,
@@ -62,7 +66,7 @@ def criar_router() -> APIRouter:
     @router.post(
         "/v1/company/full-check",
         response_model=FiscalResponse,
-        dependencies=[Depends(exigir_token_interno)],
+        dependencies=[Depends(exigir_token_interno), Depends(exigir_rate_limit)],
     )
     async def full_check(
         payload: CompanyLookupRequest,
