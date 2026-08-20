@@ -1,0 +1,11 @@
+{% extends "painel/base.html" %}
+{% block title %}Visão geral — Sistema Inaptas{% endblock %}
+{% block body %}
+<main class="app-shell">
+  <header class="topbar"><a class="brand" href="/painel">Sistema Inaptas</a><span>{{ sessao.name }}</span></header>
+  <section class="content"><div class="section-heading"><div><p class="eyebrow">Triagem fiscal</p><h1>Visão geral</h1></div><a class="button button-primary" href="/painel/consultas/nova">Nova consulta</a></div>
+    <div class="metric-row"><div class="metric"><span>Consultas no histórico</span><strong>{{ total }}</strong></div><div class="metric"><span>Organização</span><strong>{{ sessao.organization_id[:8] }}</strong></div></div>
+    <section class="panel"><div class="section-heading"><h2>Consultas recentes</h2><a href="/painel/consultas">Ver histórico</a></div>{% if consultas %}<table><thead><tr><th>CNPJ</th><th>Solicitada em</th><th>Status</th></tr></thead><tbody>{% for consulta in consultas %}<tr><td><a href="/painel/consultas/{{ consulta.id }}">{{ consulta.cnpj }}</a></td><td>{{ consulta.requested_at }}</td><td>{{ consulta.status }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="muted">Nenhuma consulta registrada.</p>{% endif %}</section>
+  </section>
+</main>
+{% endblock %}

@@ -79,6 +79,17 @@ class Consultation(Base):
     origin: Mapped[str] = mapped_column(String(32), default="api")
 
 
+class ConsultationResult(Base):
+    __tablename__ = "consultation_results"
+
+    consultation_id: Mapped[str] = mapped_column(
+        ForeignKey("consultations.id", ondelete="CASCADE"), primary_key=True
+    )
+    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), index=True)
+    normalized_response: Mapped[dict[str, object]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora_utc)
+
+
 class ApiAudit(Base):
     __tablename__ = "api_audit"
 
