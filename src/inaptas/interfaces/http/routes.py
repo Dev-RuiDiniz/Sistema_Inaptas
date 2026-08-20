@@ -8,6 +8,7 @@ from redis.exceptions import RedisError
 from starlette.responses import PlainTextResponse
 
 from inaptas.application.services import FiscalGatewayService
+from inaptas.infrastructure.health import verificar_dependencias
 from inaptas.infrastructure.integrations.webhooks import extrair_evento_id
 from inaptas.interfaces.http.dependencies import (
     exigir_rate_limit,
@@ -23,7 +24,11 @@ def criar_router() -> APIRouter:
     @router.get("/health")
     async def health(request: Request) -> dict[str, object]:
         settings = request.app.state.settings
-        health_state = request.app.state.health_state.snapshot()
+        health_state = await verificar_dependencias(
+            request.app.state.database_engine,
+            request.app.state.redis_client,
+            request.app.state.health_state,
+        )
         return {
             "status": health_state["status"],
             "version": settings.app_version,

@@ -9,11 +9,14 @@ _CHAVES_SENSIVEIS = {
     "authorization",
     "access_token",
     "api_key",
+    "app_secret",
     "client_secret",
     "dify_api_key",
     "internal_api_token",
     "password",
     "token",
+    "whatsapp_access_token",
+    "whatsapp_app_secret",
 }
 
 

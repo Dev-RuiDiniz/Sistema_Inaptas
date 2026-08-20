@@ -45,3 +45,29 @@ async def test_timeout_da_receitaws_vira_indisponibilidade() -> None:
 
     assert resultado.status is ProviderStatus.UNAVAILABLE
     assert resultado.error_code == "provider_timeout"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_erro_5xx_da_receitaws_vira_indisponibilidade() -> None:
+    respx.get("https://api.teste/v1/cnpj/11222333000181").mock(
+        return_value=httpx.Response(503, json={"error": "indisponivel"})
+    )
+
+    resultado = await ReceitaWsProvider("https://api.teste").consultar("11222333000181")
+
+    assert resultado.status is ProviderStatus.UNAVAILABLE
+    assert resultado.error_code == "provider_unavailable"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_json_invalido_da_receitaws_vira_erro_controlado() -> None:
+    respx.get("https://api.teste/v1/cnpj/11222333000181").mock(
+        return_value=httpx.Response(200, content=b"nao-json")
+    )
+
+    resultado = await ReceitaWsProvider("https://api.teste").consultar("11222333000181")
+
+    assert resultado.status is ProviderStatus.ERROR
+    assert resultado.error_code == "provider_invalid_json"

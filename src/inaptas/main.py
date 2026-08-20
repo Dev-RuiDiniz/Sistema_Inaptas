@@ -1,4 +1,6 @@
 import re
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -9,7 +11,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from inaptas.application.services import FiscalGatewayService
-from inaptas.config import Settings, get_settings
+from inaptas.config import Settings, get_settings, validar_configuracao
 from inaptas.domain.cnpj import CnpjInvalidoError
 from inaptas.infrastructure.cache.redis_store import RedisStore
 from inaptas.infrastructure.health import HealthState
@@ -22,6 +24,17 @@ from inaptas.interfaces.http.errors import tratar_cnpj_invalido, tratar_http_exc
 from inaptas.interfaces.http.routes import criar_router
 
 _CORRELATION_ID_VALIDO = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    try:
+        yield
+    finally:
+        try:
+            await app.state.redis_store.fechar()
+        finally:
+            await app.state.database_engine.dispose()
 
 
 class CorrelationMiddleware(BaseHTTPMiddleware):
@@ -39,9 +52,11 @@ def create_app(
     service: FiscalGatewayService | None = None,
 ) -> FastAPI:
     configuracao = settings or get_settings()
+    validar_configuracao(configuracao)
     app = FastAPI(
         title="Fiscal Gateway — Inaptas",
         version=configuracao.app_version,
+        lifespan=_lifespan,
         docs_url="/docs" if configuracao.openapi_enabled else None,
         redoc_url="/redoc" if configuracao.openapi_enabled else None,
         openapi_url="/openapi.json" if configuracao.openapi_enabled else None,

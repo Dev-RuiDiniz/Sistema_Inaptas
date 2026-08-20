@@ -2,10 +2,12 @@ from datetime import UTC, datetime
 
 from fakeredis.aioredis import FakeRedis
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from inaptas.config import Settings
 from inaptas.domain.cnpj import CnpjInvalidoError, normalizar_cnpj
 from inaptas.infrastructure.cache.redis_store import RedisStore
+from inaptas.infrastructure.persistence.database import criar_fabrica_sessoes
 from inaptas.interfaces.http.schemas import FiscalResponse
 from inaptas.main import create_app
 
@@ -36,7 +38,12 @@ def _cliente() -> TestClient:
         trusted_hosts=["testserver"],
         rate_limit_enabled=False,
     )
-    return TestClient(create_app(settings=configuracao, service=ServicoFalso()))
+    app = create_app(settings=configuracao, service=ServicoFalso())
+    app.state.redis_client = FakeRedis()
+    app.state.redis_store = RedisStore(app.state.redis_client)
+    app.state.database_engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    app.state.session_factory = criar_fabrica_sessoes(app.state.database_engine)
+    return TestClient(app)
 
 
 def test_health_e_publico_e_retorna_correlation_id() -> None:
@@ -53,6 +60,17 @@ def test_rota_interna_rejeita_token_ausente() -> None:
     assert resposta.json()["error"]["code"] == "unauthorized"
 
 
+def test_rota_interna_rejeita_token_invalido() -> None:
+    resposta = _cliente().post(
+        "/v1/company/lookup",
+        headers={"Authorization": "Bearer token-incorreto"},
+        json={"cnpj": "11222333000181"},
+    )
+
+    assert resposta.status_code == 401
+    assert resposta.json()["error"]["code"] == "unauthorized"
+
+
 def test_lookup_autenticado_devolve_resposta_canonica() -> None:
     resposta = _cliente().post(
         "/v1/company/lookup",
@@ -63,6 +81,17 @@ def test_lookup_autenticado_devolve_resposta_canonica() -> None:
     assert resposta.status_code == 200
     assert resposta.headers["X-Correlation-ID"] == "correlacao-teste"
     assert resposta.json()["cnpj"] == "11222333000181"
+
+
+def test_lookup_autenticado_aceita_cnpj_alfanumerico() -> None:
+    resposta = _cliente().post(
+        "/v1/company/lookup",
+        headers={"Authorization": "Bearer token-teste"},
+        json={"cnpj": "12abc34501de35"},
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["cnpj"] == "12ABC34501DE35"
 
 
 def test_cnpj_invalido_retorna_erro_estavel() -> None:

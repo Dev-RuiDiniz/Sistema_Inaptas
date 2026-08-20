@@ -45,6 +45,23 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 
 **Critérios de aceite:** cada dependência possui responsável, status, evidência de acesso ou bloqueio documentado; nenhum secret é colocado no Git; existe um CNPJ real autorizado para demonstrar `CNPJ → Fiscal Gateway → fonte → retorno estruturado`.
 
+## Preparação pré-credenciais — validação local
+
+**Status:** implementação técnica concluída; execução do Compose depende de Docker Desktop.
+
+- [x] Criar specs de ambiente local, testes, segurança e operação.
+- [x] Preparar migration automática no Docker Compose.
+- [x] Criar script PowerShell de validação local sem impressão de secrets.
+- [x] Implementar healthcheck real de PostgreSQL e Redis.
+- [x] Ampliar testes mockados sem chamadas externas reais.
+- [x] Criar testes opcionais de integração marcados como `integracao`.
+- [x] Endurecer configuração de produção e redaction de logs.
+- [x] Criar scanner de possíveis secrets em arquivos versionados.
+- [x] Documentar operação, comandos e bloqueios.
+- [!] Executar Compose e testes de integração com PostgreSQL/Redis reais — Docker não instalado no ambiente atual.
+
+**Critérios de aceite:** testes mockados, Ruff, MyPy e scanner de segurança aprovados; Compose validado quando Docker estiver disponível; ausência do Docker permanece documentada como bloqueio, sem marcar a integração local como concluída.
+
 ## Fase 1 — MVP Inaptas
 
 **Status:** concluída tecnicamente; POC e validação do Compose aguardam dependências do ambiente/Fase 0.
@@ -67,7 +84,7 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 
 **Critérios de aceite:** CNPJ válido retorna JSON normalizado; CNPJ inválido é rejeitado; CNPJ alfanumérico é aceito; indisponibilidade nunca vira resposta fiscal falsa; webhook duplicado não duplica consulta; secrets não aparecem em frontend ou logs; o fluxo WhatsApp → Dify → backend → fonte → resposta está preparado e será demonstrado quando as contas estiverem disponíveis.
 
-**Evidências técnicas:** 35 testes automatizados aprovados; Ruff e MyPy aprovados; migration Alembic `0001_base` reconhecida; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
+**Evidências técnicas:** 53 testes passaram e 1 teste de integração foi pulado por ausência do Docker; Ruff, MyPy, scanner de segurança e Alembic `0001_base` foram aprovados; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 
@@ -125,3 +142,4 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 | Data | Marco | Evidência | Observação |
 |---|---|---|---|
 | 20/08/2026 | Governança documental e SDD | Arquivos de governança versionados | Bootstrap inicial do projeto |
+| 20/08/2026 | Preparação pré-credenciais | Specs, testes mockados, scripts e guia operacional | Compose aguarda Docker Desktop |

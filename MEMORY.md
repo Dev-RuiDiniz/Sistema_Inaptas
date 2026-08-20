@@ -7,8 +7,8 @@
 - **Data da última atualização:** 20/08/2026.
 - **Produto:** Inaptas.
 - **Direção futura:** Regulariza.br modular.
-- **Fase atual:** Fase 1 implementada tecnicamente; Fase 0 ainda aguarda validação de acessos externos para a POC.
-- **Código de aplicação:** Fiscal Gateway FastAPI implementado na branch `funcionalidade/arquitetura-fase1`.
+- **Fase atual:** Fase 1 e preparação pré-credenciais implementadas tecnicamente; Fase 0 ainda aguarda validação de acessos externos para a POC.
+- **Código de aplicação:** Fiscal Gateway FastAPI implementado e preparação local desenvolvida na branch `funcionalidade/validacao-pre-credenciais`.
 - **Fonte de escopo:** `escopo_tecnico_inaptas_regularizabr_atualizado.md`.
 - **Repositório:** branch principal `main`, remoto `origin`.
 - **Idioma obrigatório:** português do Brasil em documentação, specs, comentários, planos e commits.
@@ -57,7 +57,9 @@ O Dify nunca deve possuir diretamente todas as credenciais fiscais. O backend co
 - `src/inaptas/infrastructure/persistence`: SQLAlchemy, repositórios e Alembic.
 - `src/inaptas/infrastructure/cache`: Redis, cache, rate limit e idempotência.
 - `src/inaptas/infrastructure/integrations`: clientes Dify, WhatsApp e webhook Meta.
-- `tests/`: 35 testes automatizados sem chamadas externas reais.
+- `tests/`: 53 testes passaram sem chamadas externas reais; integração com Compose é opcional e marcada como `integracao`, com 1 teste pulado quando Docker não está disponível.
+- `scripts/validar-local.ps1`: inicia Compose e executa smoke tests locais sem imprimir secrets.
+- `scripts/verificar-seguranca.ps1`: procura padrões de credenciais somente em arquivos versionados.
 
 ## Dependências externas
 
@@ -74,13 +76,13 @@ Nenhuma credencial deve ser registrada neste arquivo. O status de acesso deve se
 
 ## Bloqueios conhecidos
 
-- Docker/Compose não está instalado no ambiente atual; a configuração foi criada, mas a subida dos serviços ainda precisa ser validada em ambiente com Docker.
+- Docker/Compose não está instalado no ambiente atual; a configuração, migration e scripts foram criados, mas a subida dos serviços ainda precisa ser validada em ambiente com Docker.
 - A POC com CNPJ real e a ativação de Dify, WhatsApp, SERPRO e PGFN dependem da conclusão da Fase 0.
 
 ## Próximo passo recomendado
 
-1. Voltar à Fase 0 e validar contas, responsáveis, titularidade e CNPJ de teste autorizado.
-2. Validar Docker Compose em ambiente com Docker instalado.
+1. Validar Docker Compose em ambiente com Docker instalado e executar `pytest -m integracao`.
+2. Voltar à Fase 0 e validar contas, responsáveis, titularidade e CNPJ de teste autorizado.
 3. Ativar providers externos somente após homologação e registrar o resultado nesta memória.
 
 ## Regra de manutenção
