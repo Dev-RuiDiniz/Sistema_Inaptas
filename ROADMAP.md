@@ -84,7 +84,7 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 
 **Critérios de aceite:** CNPJ válido retorna JSON normalizado; CNPJ inválido é rejeitado; CNPJ alfanumérico é aceito; indisponibilidade nunca vira resposta fiscal falsa; webhook duplicado não duplica consulta; secrets não aparecem em frontend ou logs; o fluxo WhatsApp → Dify → backend → fonte → resposta está preparado e será demonstrado quando as contas estiverem disponíveis.
 
-**Evidências técnicas:** suíte automatizada ampliada com cenários de healthcheck, indisponibilidade, segurança e integração; Ruff, MyPy e scanner de segurança aprovados; migration Alembic `0001_base` reconhecida; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
+**Evidências técnicas:** 53 testes passaram e 1 teste de integração foi pulado por ausência do Docker; Ruff, MyPy, scanner de segurança e Alembic `0001_base` foram aprovados; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 

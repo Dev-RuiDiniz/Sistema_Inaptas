@@ -57,7 +57,7 @@ O Dify nunca deve possuir diretamente todas as credenciais fiscais. O backend co
 - `src/inaptas/infrastructure/persistence`: SQLAlchemy, repositórios e Alembic.
 - `src/inaptas/infrastructure/cache`: Redis, cache, rate limit e idempotência.
 - `src/inaptas/infrastructure/integrations`: clientes Dify, WhatsApp e webhook Meta.
-- `tests/`: suíte automatizada ampliada sem chamadas externas reais; integração com Compose é opcional e marcada como `integracao`.
+- `tests/`: 53 testes passaram sem chamadas externas reais; integração com Compose é opcional e marcada como `integracao`, com 1 teste pulado quando Docker não está disponível.
 - `scripts/validar-local.ps1`: inicia Compose e executa smoke tests locais sem imprimir secrets.
 - `scripts/verificar-seguranca.ps1`: procura padrões de credenciais somente em arquivos versionados.
 

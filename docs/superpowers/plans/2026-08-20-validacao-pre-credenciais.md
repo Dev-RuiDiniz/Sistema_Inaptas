@@ -25,7 +25,16 @@
 - [x] Criar testes de integração marcados como `integracao`.
 - [x] Endurecer configuração de produção e criar verificação de secrets.
 - [x] Documentar operação local, critérios e bloqueios no ROADMAP/MEMORY.
-- [ ] Executar a validação final, revisar o histórico e publicar a branch.
+- [x] Executar a validação final, revisar o histórico e publicar a branch.
+
+## Resultado da validação final
+
+- 53 testes passaram e 1 teste de integração foi pulado porque Docker não está
+  instalado neste ambiente.
+- Ruff, MyPy, Alembic e scanner de segurança passaram.
+- `docker compose config --quiet` permanece bloqueado pelo comando Docker
+  ausente.
+- A última ação da execução será o push da branch de funcionalidade.
 
 ## Regras por tarefa
 
