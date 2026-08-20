@@ -55,6 +55,20 @@ class RedisStore:
             valor = valor.decode("utf-8")
         return json.loads(valor)
 
+    async def salvar_sessao(self, chave: str, valor: dict[str, Any], ttl_segundos: int) -> None:
+        await self.salvar_cache(f"painel:sessao:{chave}", valor, ttl_segundos)
+
+    async def obter_sessao(self, chave: str) -> dict[str, Any] | None:
+        valor = await self.obter_cache(f"painel:sessao:{chave}")
+        return valor if isinstance(valor, dict) else None
+
+    async def remover_sessao(self, chave: str) -> None:
+        try:
+            await self.client.delete(f"painel:sessao:{chave}")
+        except RedisError:
+            self._marcar_indisponivel()
+            raise
+
     async def fechar(self) -> None:
         await self.client.aclose()
 

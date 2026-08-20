@@ -24,6 +24,8 @@ from inaptas.infrastructure.persistence.database import criar_engine, criar_fabr
 from inaptas.interfaces.http.dependencies import criar_servico
 from inaptas.interfaces.http.errors import tratar_cnpj_invalido, tratar_http_exception
 from inaptas.interfaces.http.routes import criar_router
+from inaptas.interfaces.panel.auth import PainelAuthService
+from inaptas.interfaces.panel.auth_routes import criar_router_autenticacao
 from inaptas.interfaces.panel.templates import criar_templates
 
 _CORRELATION_ID_VALIDO = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
@@ -70,6 +72,7 @@ def create_app(
     app.state.health_state = HealthState()
     app.state.redis_client = Redis.from_url(configuracao.redis_url)
     app.state.redis_store = RedisStore(app.state.redis_client, app.state.health_state)
+    app.state.panel_auth = PainelAuthService(configuracao, app.state.redis_store)
     app.state.dify_client = DifyClient(
         configuracao.dify_base_url,
         configuracao.dify_api_key,
@@ -90,6 +93,7 @@ def create_app(
     app.add_exception_handler(CnpjInvalidoError, tratar_cnpj_invalido)
     app.add_exception_handler(HTTPException, tratar_http_exception)
     app.include_router(criar_router())
+    app.include_router(criar_router_autenticacao())
     app.mount(
         "/painel/static",
         StaticFiles(directory=str(Path(__file__).parent / "interfaces" / "panel" / "static")),

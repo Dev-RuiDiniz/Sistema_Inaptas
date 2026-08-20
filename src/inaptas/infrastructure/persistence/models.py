@@ -3,8 +3,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.types import JSON
 
 
 def agora_utc() -> datetime:
@@ -13,6 +14,46 @@ def agora_utc() -> datetime:
 
 class Base(DeclarativeBase):
     pass
+
+
+class Organization(Base):
+    __tablename__ = "organizations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(160))
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    retention_days: Mapped[int] = mapped_column(Integer, default=90)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora_utc)
+
+
+class PanelUser(Base):
+    __tablename__ = "panel_users"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), index=True)
+    oidc_subject: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), index=True)
+    name: Mapped[str] = mapped_column(String(160))
+    role: Mapped[str] = mapped_column(String(32), default="operator")
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora_utc)
+
+
+class PanelAudit(Base):
+    __tablename__ = "panel_audit"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    actor_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("panel_users.id"), nullable=True, index=True
+    )
+    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), index=True)
+    action: Mapped[str] = mapped_column(String(80))
+    target_type: Mapped[str] = mapped_column(String(80))
+    target_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    metadata_redacted: Mapped[dict[str, object]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora_utc)
 
 
 class Consultation(Base):
@@ -29,6 +70,13 @@ class Consultation(Base):
     response_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     whatsapp_contact_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    organization_id: Mapped[str | None] = mapped_column(
+        ForeignKey("organizations.id"), nullable=True, index=True
+    )
+    requested_by_user_id: Mapped[str | None] = mapped_column(
+        ForeignKey("panel_users.id"), nullable=True, index=True
+    )
+    origin: Mapped[str] = mapped_column(String(32), default="api")
 
 
 class ApiAudit(Base):
