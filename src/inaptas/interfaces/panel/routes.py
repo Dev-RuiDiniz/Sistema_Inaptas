@@ -33,10 +33,11 @@ def criar_router_painel() -> APIRouter:
             consultas, total = await request.app.state.panel_consultas.listar(
                 session, sessao.organization_id, page_size=5
             )
+            resumo = await request.app.state.panel_dashboard.resumo(session, sessao.organization_id)
         return request.app.state.panel_templates.TemplateResponse(
             request=request,
             name="painel/home.html",
-            context={"sessao": sessao, "consultas": consultas, "total": total},
+            context={"sessao": sessao, "consultas": consultas, "total": total, "resumo": resumo},
         )
 
     @router.get("/painel/consultas", name="painel_consultas")

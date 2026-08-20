@@ -24,9 +24,11 @@ from inaptas.infrastructure.persistence.database import criar_engine, criar_fabr
 from inaptas.interfaces.http.dependencies import criar_servico
 from inaptas.interfaces.http.errors import tratar_cnpj_invalido, tratar_http_exception
 from inaptas.interfaces.http.routes import criar_router
+from inaptas.interfaces.panel.admin import criar_router_admin
 from inaptas.interfaces.panel.auth import PainelAuthService
 from inaptas.interfaces.panel.auth_routes import criar_router_autenticacao
 from inaptas.interfaces.panel.consultas import PainelConsultaService
+from inaptas.interfaces.panel.dashboard import PainelDashboardService
 from inaptas.interfaces.panel.routes import criar_router_painel
 from inaptas.interfaces.panel.templates import criar_templates
 
@@ -76,6 +78,7 @@ def create_app(
     app.state.redis_store = RedisStore(app.state.redis_client, app.state.health_state)
     app.state.panel_auth = PainelAuthService(configuracao, app.state.redis_store)
     app.state.panel_consultas = PainelConsultaService(app.state.gateway_service)
+    app.state.panel_dashboard = PainelDashboardService()
     app.state.dify_client = DifyClient(
         configuracao.dify_base_url,
         configuracao.dify_api_key,
@@ -98,6 +101,7 @@ def create_app(
     app.include_router(criar_router())
     app.include_router(criar_router_autenticacao())
     app.include_router(criar_router_painel())
+    app.include_router(criar_router_admin())
     app.mount(
         "/painel/static",
         StaticFiles(directory=str(Path(__file__).parent / "interfaces" / "panel" / "static")),
