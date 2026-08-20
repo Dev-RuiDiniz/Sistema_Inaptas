@@ -1,13 +1,13 @@
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from inaptas.infrastructure.persistence.models import Base
+from alembic import context
 from inaptas.config import get_settings
+from inaptas.infrastructure.persistence.models import Base
 
 config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().database_url.replace("%", "%%"))
