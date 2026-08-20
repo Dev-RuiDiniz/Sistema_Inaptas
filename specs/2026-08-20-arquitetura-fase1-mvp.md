@@ -1,6 +1,6 @@
 # Spec: Arquitetura da Fase 1 — MVP Inaptas
 
-**Status:** em revisão
+**Status:** concluída tecnicamente; POC externa pendente
 **Data:** 20/08/2026
 **Relaciona-se a:** `PRD.md` seções 4–12; `ROADMAP.md` Fase 1
 **Fonte de domínio:** `escopo_tecnico_inaptas_regularizabr_atualizado.md`
@@ -302,3 +302,14 @@ Cada consulta grava uma linha de `consultations` e uma linha de `api_audit` por 
 - 20/08/2026: definido provider ReceitaWS como primeiro adaptador cadastral configurável.
 - 20/08/2026: definido PGFN/SITFIS/ADE como portas preparadas e desabilitadas sem acesso válido.
 - 20/08/2026: definida validação de CNPJ alfanumérico conforme documentação oficial da Receita Federal.
+
+## 14. Resultado da implementação
+
+- Fiscal Gateway FastAPI implementado em `src/inaptas/`.
+- PostgreSQL, Redis, Alembic e Docker Compose configurados.
+- ReceitaWS implementado como provider cadastral configurável.
+- PGFN, SITFIS e ADE/Editais preparados como providers desabilitados.
+- Dify e WhatsApp preparados com autenticação, assinatura Meta, challenge e idempotência.
+- Histórico de períodos de Simples Nacional e SIMEI/MEI reservado no contrato.
+- 35 testes automatizados aprovados; Ruff e MyPy aprovados.
+- Validação de `docker compose config` pendente porque Docker não está instalado no ambiente de execução.

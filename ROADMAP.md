@@ -47,25 +47,27 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 
 ## Fase 1 — MVP Inaptas
 
-**Status:** pendente.
+**Status:** concluída tecnicamente; POC e validação do Compose aguardam dependências do ambiente/Fase 0.
 
-- [ ] Criar a base FastAPI do Fiscal Gateway.
-- [ ] Definir modelos Pydantic e contrato JSON normalizado.
-- [ ] Implementar normalização e validação de CNPJ numérico e alfanumérico.
-- [ ] Implementar conector cadastral desacoplado.
-- [ ] Retornar situação cadastral, motivo, data, Simples Nacional atual e SIMEI/MEI atual quando disponíveis.
-- [ ] Implementar diagnóstico determinístico separado de `source_data` e `ai_interpretation`.
-- [ ] Preparar conector/interface de PGFN e ativá-lo quando houver acesso válido.
-- [ ] Preparar estrutura para histórico de Simples Nacional e SIMEI/MEI sem inventar dados.
-- [ ] Preparar interface futura para SITFIS e ADE/Editais.
-- [ ] Implementar `GET /health` e endpoints internos definidos no PRD.
-- [ ] Implementar logs estruturados, correlation ID, auditoria mínima, cache e rate limit.
-- [ ] Integrar o backend ao Dify sem expor credenciais fiscais.
-- [ ] Integrar o webhook da WhatsApp Cloud API com idempotência e deduplicação.
-- [ ] Criar Docker/Compose e documentação de configuração segura.
-- [ ] Executar POC com CNPJ real autorizado antes da segunda parcela.
+- [x] Criar a base FastAPI do Fiscal Gateway.
+- [x] Definir modelos Pydantic e contrato JSON normalizado.
+- [x] Implementar normalização e validação de CNPJ numérico e alfanumérico.
+- [x] Implementar conector cadastral desacoplado.
+- [x] Retornar situação cadastral, motivo, data, Simples Nacional atual e SIMEI/MEI atual quando disponíveis.
+- [x] Implementar diagnóstico determinístico separado de `source_data` e `ai_interpretation`.
+- [x] Preparar conector/interface de PGFN e ativá-lo quando houver acesso válido.
+- [x] Preparar estrutura para histórico de Simples Nacional e SIMEI/MEI sem inventar dados.
+- [x] Preparar interface futura para SITFIS e ADE/Editais.
+- [x] Implementar `GET /health` e endpoints internos definidos no PRD.
+- [x] Implementar logs estruturados, correlation ID, auditoria mínima, cache e rate limit.
+- [x] Integrar o backend ao Dify sem expor credenciais fiscais.
+- [x] Integrar o webhook da WhatsApp Cloud API com idempotência e deduplicação.
+- [x] Criar Docker/Compose e documentação de configuração segura.
+- [!] Executar POC com CNPJ real autorizado antes da segunda parcela — depende da Fase 0 e das contas externas.
 
-**Critérios de aceite:** CNPJ válido retorna JSON normalizado; CNPJ inválido é rejeitado; CNPJ alfanumérico é aceito; indisponibilidade nunca vira resposta fiscal falsa; webhook duplicado não duplica consulta; secrets não aparecem em frontend ou logs; o fluxo WhatsApp → Dify → backend → fonte → resposta é demonstrável quando as contas estiverem disponíveis.
+**Critérios de aceite:** CNPJ válido retorna JSON normalizado; CNPJ inválido é rejeitado; CNPJ alfanumérico é aceito; indisponibilidade nunca vira resposta fiscal falsa; webhook duplicado não duplica consulta; secrets não aparecem em frontend ou logs; o fluxo WhatsApp → Dify → backend → fonte → resposta está preparado e será demonstrado quando as contas estiverem disponíveis.
+
+**Evidências técnicas:** 35 testes automatizados aprovados; Ruff e MyPy aprovados; migration Alembic `0001_base` reconhecida; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 

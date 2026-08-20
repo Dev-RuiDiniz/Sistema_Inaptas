@@ -7,8 +7,8 @@
 - **Data da última atualização:** 20/08/2026.
 - **Produto:** Inaptas.
 - **Direção futura:** Regulariza.br modular.
-- **Fase atual:** bootstrap documental concluído; Fase 0 aguardando validação de acessos externos.
-- **Código de aplicação:** ainda não iniciado neste bootstrap.
+- **Fase atual:** Fase 1 implementada tecnicamente; Fase 0 ainda aguarda validação de acessos externos para a POC.
+- **Código de aplicação:** Fiscal Gateway FastAPI implementado na branch `funcionalidade/arquitetura-fase1`.
 - **Fonte de escopo:** `escopo_tecnico_inaptas_regularizabr_atualizado.md`.
 - **Repositório:** branch principal `main`, remoto `origin`.
 - **Idioma obrigatório:** português do Brasil em documentação, specs, comentários, planos e commits.
@@ -26,6 +26,9 @@
 9. A IA não pode inferir situação fiscal, dívida, regime, pendência ou ausência de problema sem evidência válida.
 10. SITFIS e ADE/Editais ficam preparados como extensões; bypass de CAPTCHA, scraping agressivo e automação de login no e-CAC não são permitidos.
 11. Custos e acessos de SERPRO, APIs, certificado, servidor, WhatsApp, Dify, LLM e demais terceiros são responsabilidade do contratante, conforme o escopo técnico.
+12. O MVP usa PostgreSQL para auditoria e Redis para cache, rate limit e idempotência; ambos são provisionados por Docker Compose.
+13. ReceitaWS é o primeiro provider cadastral configurável; PGFN, SITFIS e ADE/Editais permanecem desabilitados sem acesso válido.
+14. O contrato reserva histórico de períodos de Simples Nacional e SIMEI/MEI sem inferir datas ausentes.
 
 ## Arquitetura de referência
 
@@ -45,6 +48,17 @@ PostgreSQL (auditoria) + Redis (cache, tokens, rate limit)
 
 O Dify nunca deve possuir diretamente todas as credenciais fiscais. O backend controla autenticação, timeout, retry, cache, rate limit, auditoria, normalização e mensagens seguras de indisponibilidade.
 
+## Implementação atual
+
+- `src/inaptas/domain`: CNPJ, modelos de provider e diagnóstico determinístico.
+- `src/inaptas/application`: portas e casos de uso do Fiscal Gateway.
+- `src/inaptas/interfaces/http`: schemas Pydantic, autenticação, rotas e erros.
+- `src/inaptas/infrastructure/providers`: ReceitaWS e providers fiscais desabilitados.
+- `src/inaptas/infrastructure/persistence`: SQLAlchemy, repositórios e Alembic.
+- `src/inaptas/infrastructure/cache`: Redis, cache, rate limit e idempotência.
+- `src/inaptas/infrastructure/integrations`: clientes Dify, WhatsApp e webhook Meta.
+- `tests/`: 35 testes automatizados sem chamadas externas reais.
+
 ## Dependências externas
 
 | Serviço | Uso | Situação no bootstrap |
@@ -58,11 +72,16 @@ O Dify nunca deve possuir diretamente todas as credenciais fiscais. O backend co
 
 Nenhuma credencial deve ser registrada neste arquivo. O status de acesso deve ser atualizado como “disponível”, “indisponível” ou “bloqueado por terceiro”, sempre com evidência segura fora do Git.
 
+## Bloqueios conhecidos
+
+- Docker/Compose não está instalado no ambiente atual; a configuração foi criada, mas a subida dos serviços ainda precisa ser validada em ambiente com Docker.
+- A POC com CNPJ real e a ativação de Dify, WhatsApp, SERPRO e PGFN dependem da conclusão da Fase 0.
+
 ## Próximo passo recomendado
 
-1. Criar uma spec para a Fase 0 de validação dos acessos e do contrato mínimo do Fiscal Gateway.
-2. Confirmar contas, responsáveis, titularidade e CNPJ de teste autorizado.
-3. Só depois iniciar a primeira implementação de código.
+1. Voltar à Fase 0 e validar contas, responsáveis, titularidade e CNPJ de teste autorizado.
+2. Validar Docker Compose em ambiente com Docker instalado.
+3. Ativar providers externos somente após homologação e registrar o resultado nesta memória.
 
 ## Regra de manutenção
 
