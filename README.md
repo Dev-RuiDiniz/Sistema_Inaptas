@@ -11,6 +11,7 @@ Projeto do MVP Inaptas: atendimento via WhatsApp e Dify, com um Fiscal Gateway p
 5. [Fluxo de especificações SDD](specs/README.md)
 6. [Escopo técnico de origem](escopo_tecnico_inaptas_regularizabr_atualizado.md)
 7. [Guia de validação local](docs/operacao/validacao-local.md)
+8. [Guia do painel do escritório](docs/operacao/painel-escritorio.md)
 
 ## Método de desenvolvimento
 
@@ -41,3 +42,14 @@ Remove-Item Env:EXECUTAR_INTEGRACAO -ErrorAction SilentlyContinue
 ```
 
 O Docker Compose sobe a migration, a aplicação, PostgreSQL e Redis. A execução depende de Docker Desktop instalado e ativo. Consulte o [guia operacional](docs/operacao/validacao-local.md) para logs, parada dos serviços e diagnóstico.
+
+## Painel interno do escritório
+
+O painel server-side é destinado à equipe do escritório, enquanto o cliente
+continua usando WhatsApp. Ele oferece consulta manual, histórico, evidências,
+relatórios PDF/CSV, dashboard operacional e administração de usuários.
+
+O painel exige `PANEL_ENABLED=true` e um provedor OIDC configurado. Em produção,
+use `PANEL_SESSION_SECURE=true`; nenhum Bearer interno, token fiscal ou segredo é
+enviado ao navegador. Consulte [painel-escritorio.md](docs/operacao/painel-escritorio.md)
+para as rotas e o procedimento de ativação.

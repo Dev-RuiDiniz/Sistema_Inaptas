@@ -1,6 +1,6 @@
 # Spec — Dashboard operacional do painel
 
-**Status:** aprovada para implementação.
+**Status:** implementada tecnicamente em 20/08/2026; fontes reais e OIDC permanecem pendentes.
 
 ## Objetivo
 
@@ -31,4 +31,3 @@ indisponibilidades sem transformar desconhecimento em diagnóstico fiscal.
 - Provider indisponível aparece como alerta operacional.
 - Falha do banco ou Redis apresenta estado degradado seguro.
 - O dashboard não expõe payload fiscal bruto ou credenciais.
-

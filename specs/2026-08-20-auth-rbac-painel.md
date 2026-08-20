@@ -1,6 +1,6 @@
 # Spec — Autenticação e RBAC do painel
 
-**Status:** aprovada para implementação.
+**Status:** implementada tecnicamente em 20/08/2026; ativação OIDC real pendente das credenciais do cliente.
 
 ## Objetivo
 
@@ -47,4 +47,3 @@ POST /painel/admin/usuarios/{id}/papel
   `organization_id`.
 - O provedor OIDC é configurável por ambiente e não é fixado no código.
 - Sem configuração OIDC, o painel permanece desativado sem afetar o WhatsApp.
-

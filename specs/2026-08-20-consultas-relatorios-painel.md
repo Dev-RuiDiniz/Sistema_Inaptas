@@ -1,6 +1,6 @@
 # Spec — Consultas, histórico e relatórios do painel
 
-**Status:** aprovada para implementação.
+**Status:** implementada tecnicamente em 20/08/2026; validação integrada depende do ambiente local e da Fase 0.
 
 ## Objetivo
 
@@ -49,4 +49,3 @@ POST /painel/admin/configuracoes/retencao
 - Consulta de outra organização retorna 404/403 sem revelar existência.
 - PDF e CSV não contêm Authorization, tokens, secrets ou `source_data` bruto.
 - Dados vencidos pela retenção podem ser removidos pelo comando operacional.
-

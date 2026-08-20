@@ -85,6 +85,20 @@ Nenhuma credencial deve ser registrada neste arquivo. O status de acesso deve se
 2. Voltar à Fase 0 e validar contas, responsáveis, titularidade e CNPJ de teste autorizado.
 3. Ativar providers externos somente após homologação e registrar o resultado nesta memória.
 
+## Painel interno do escritório — estado em 20/08/2026
+
+- O painel foi implementado na branch `funcionalidade/frontend-painel-escritorio` no mesmo monólito FastAPI, com Jinja2, CSS próprio e JavaScript mínimo.
+- O cliente final continua no WhatsApp; o painel é destinado aos profissionais do escritório.
+- Rotas implementadas: login/callback/logout OIDC, início, consulta manual, histórico, detalhe, PDF, CSV, usuários e retenção.
+- OIDC usa Authorization Code com PKCE, state, nonce, issuer/audience/JWKS e e-mail verificado. Sessões e estado do fluxo ficam no Redis; o navegador recebe apenas cookie HttpOnly.
+- O modelo de dados inclui organizações, usuários, auditoria, resultados normalizados e vínculo da consulta à organização/usuário/origem. Retenção inicial: 90 dias.
+- Papéis: `admin` gerencia usuários e retenção; `operator` consulta, acompanha evidências, exporta e visualiza o dashboard. O backend aplica o RBAC e bloqueia a remoção do último administrador.
+- O dashboard mantém `UNKNOWN`, `unavailable` e `error` explícitos e nunca os transforma em ausência de dívida ou pendência.
+- Relatórios usam somente o contrato normalizado, com PDF e CSV UTF-8/BOM; tokens, payloads brutos e secrets não são persistidos ou renderizados.
+- Segurança adicional: CSRF em POSTs HTML, CSP, `X-Frame-Options`, `Referrer-Policy`, `nosniff`, cookie seguro obrigatório em produção e validação de configuração OIDC.
+- O painel permanece desativado por padrão até o cliente fornecer OIDC. A validação contra PostgreSQL/Redis reais e o login real continuam pendentes da Fase 0/Docker.
+- Documentação operacional: `docs/operacao/painel-escritorio.md`; especificações: `specs/2026-08-20-auth-rbac-painel.md`, `specs/2026-08-20-consultas-relatorios-painel.md` e `specs/2026-08-20-dashboard-operacional-painel.md`.
+
 ## Regra de manutenção
 
 - Atualizar esta memória ao concluir uma fase, fechar uma decisão, mudar uma dependência ou encontrar um bloqueio relevante.

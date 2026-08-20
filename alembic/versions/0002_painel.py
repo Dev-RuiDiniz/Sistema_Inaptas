@@ -59,9 +59,16 @@ def upgrade() -> None:
     op.create_index("ix_panel_audit_organization_id", "panel_audit", ["organization_id"])
     op.add_column("consultations", sa.Column("organization_id", sa.String(36), nullable=True))
     op.add_column("consultations", sa.Column("requested_by_user_id", sa.String(36), nullable=True))
-    op.add_column("consultations", sa.Column("origin", sa.String(32), nullable=False, server_default="api"))
+    op.add_column(
+        "consultations",
+        sa.Column("origin", sa.String(32), nullable=False, server_default="api"),
+    )
     op.create_foreign_key(
-        "fk_consultations_organization_id", "consultations", "organizations", ["organization_id"], ["id"]
+        "fk_consultations_organization_id",
+        "consultations",
+        "organizations",
+        ["organization_id"],
+        ["id"],
     )
     op.create_foreign_key(
         "fk_consultations_requested_by_user_id",
@@ -71,7 +78,11 @@ def upgrade() -> None:
         ["id"],
     )
     op.create_index("ix_consultations_organization_id", "consultations", ["organization_id"])
-    op.create_index("ix_consultations_requested_by_user_id", "consultations", ["requested_by_user_id"])
+    op.create_index(
+        "ix_consultations_requested_by_user_id",
+        "consultations",
+        ["requested_by_user_id"],
+    )
 
 
 def downgrade() -> None:

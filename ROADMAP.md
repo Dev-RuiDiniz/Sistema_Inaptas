@@ -86,6 +86,25 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 
 **Evidências técnicas:** 53 testes passaram e 1 teste de integração foi pulado por ausência do Docker; Ruff, MyPy, scanner de segurança e Alembic `0001_base` foram aprovados; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
 
+## Painel interno do escritório — incremento da Fase 1
+
+**Status:** implementação técnica concluída em 20/08/2026; ativação depende de OIDC e validação dos serviços locais.
+
+- [x] Especificar autenticação, RBAC, consultas, relatórios e dashboard em SDD.
+- [x] Preparar FastAPI/Jinja2, CSS, JavaScript progressivo e configuração server-side.
+- [x] Implementar OIDC com PKCE, state, nonce, JWKS, sessões Redis e bootstrap de administrador.
+- [x] Implementar papéis `admin` e `operator`, CSRF, cookies seguros e headers de segurança.
+- [x] Criar organizações, usuários, resultados normalizados, auditoria e retenção.
+- [x] Implementar consulta manual, histórico isolado por organização e exportações PDF/CSV.
+- [x] Implementar dashboard operacional com indisponibilidade explícita.
+- [x] Implementar gestão de usuários, convite pendente, retenção e bloqueio do último administrador.
+- [x] Criar testes de templates, OIDC/PKCE, persistência, relatórios, dashboard e segurança.
+- [!] Validar login contra OIDC do cliente e PostgreSQL/Redis reais — depende da Fase 0 e do Docker disponível.
+
+**Critérios de aceite:** usuário não autenticado é direcionado ao login; RBAC é aplicado no backend; consultas e relatórios permanecem limitados à organização; indisponibilidade não vira regularidade fiscal; POSTs exigem CSRF; ações administrativas geram auditoria; nenhum secret chega ao HTML ou aos relatórios.
+
+**Evidências:** commits `41760ed`, `b13ccc8`, `ae22add`, `35356ef`, `a5854c5`, `0bb459c` e `4c28564`; testes do painel, Ruff e MyPy aprovados. O login real e o Compose continuam bloqueados por dependências externas/ambiente.
+
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 
 **Status:** pendente.
