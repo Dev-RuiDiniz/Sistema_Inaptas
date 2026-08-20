@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sistema-inaptas"
+version = "0.1.0"
+description = "Fiscal Gateway modular do MVP Inaptas"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "alembic>=1.14,<2.0",
+    "asyncpg>=0.30,<1.0",
+    "fastapi>=0.115,<1.0",
+    "httpx>=0.27,<1.0",
+    "pydantic-settings>=2.6,<3.0",
+    "redis>=5.2,<6.0",
+    "sqlalchemy[asyncio]>=2.0,<3.0",
+    "structlog>=24.4,<26.0",
+    "uvicorn[standard]>=0.32,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "aiosqlite>=0.20,<1.0",
+    "fakeredis>=2.26,<3.0",
+    "mypy>=1.13,<2.0",
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "respx>=0.22,<1.0",
+    "ruff>=0.8,<1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/inaptas"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+asyncio_mode = "auto"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]

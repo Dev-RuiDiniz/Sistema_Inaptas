@@ -17,4 +17,16 @@ O projeto usa Spec-Driven Development (SDD). Toda mudança de produto começa co
 
 ## Estado atual
 
-O bootstrap documental foi estabelecido. A primeira fase de execução é validar acessos, titularidade e pré-requisitos externos antes de iniciar o código do Fiscal Gateway.
+O bootstrap documental e a base técnica da Fase 1 foram estabelecidos. A próxima frente é validar acessos, titularidade e pré-requisitos externos da Fase 0 para executar a POC e ativar os providers autorizados.
+
+## Execução local
+
+```powershell
+python -m pip install -e ".[dev]"
+python -m pytest -q
+python -m ruff check src tests
+python -m mypy src
+docker compose up -d --build
+```
+
+O Docker Compose sobe a aplicação, PostgreSQL e Redis. A execução do Compose depende de Docker instalado no ambiente.

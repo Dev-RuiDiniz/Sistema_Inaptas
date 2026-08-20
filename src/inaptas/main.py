@@ -1,0 +1,78 @@
+import re
+from uuid import uuid4
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from redis.asyncio import Redis
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
+from starlette.responses import Response
+
+from inaptas.application.services import FiscalGatewayService
+from inaptas.config import Settings, get_settings
+from inaptas.domain.cnpj import CnpjInvalidoError
+from inaptas.infrastructure.cache.redis_store import RedisStore
+from inaptas.infrastructure.health import HealthState
+from inaptas.infrastructure.integrations.dify import DifyClient
+from inaptas.infrastructure.integrations.whatsapp import WhatsAppClient
+from inaptas.infrastructure.observability.logging import configurar_logging
+from inaptas.infrastructure.persistence.database import criar_engine, criar_fabrica_sessoes
+from inaptas.interfaces.http.dependencies import criar_servico
+from inaptas.interfaces.http.errors import tratar_cnpj_invalido, tratar_http_exception
+from inaptas.interfaces.http.routes import criar_router
+
+_CORRELATION_ID_VALIDO = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
+
+
+class CorrelationMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        recebido = request.headers.get("X-Correlation-ID", "")
+        correlation_id = recebido if _CORRELATION_ID_VALIDO.fullmatch(recebido) else str(uuid4())
+        request.state.correlation_id = correlation_id
+        resposta = await call_next(request)
+        resposta.headers["X-Correlation-ID"] = correlation_id
+        return resposta
+
+
+def create_app(
+    settings: Settings | None = None,
+    service: FiscalGatewayService | None = None,
+) -> FastAPI:
+    configuracao = settings or get_settings()
+    app = FastAPI(
+        title="Fiscal Gateway — Inaptas",
+        version=configuracao.app_version,
+        docs_url="/docs" if configuracao.openapi_enabled else None,
+        redoc_url="/redoc" if configuracao.openapi_enabled else None,
+        openapi_url="/openapi.json" if configuracao.openapi_enabled else None,
+    )
+    app.state.settings = configuracao
+    app.state.gateway_service = service or criar_servico(configuracao)
+    app.state.health_state = HealthState()
+    app.state.redis_client = Redis.from_url(configuracao.redis_url)
+    app.state.redis_store = RedisStore(app.state.redis_client, app.state.health_state)
+    app.state.dify_client = DifyClient(
+        configuracao.dify_base_url,
+        configuracao.dify_api_key,
+        configuracao.dify_timeout_seconds,
+    )
+    app.state.whatsapp_client = WhatsAppClient(
+        access_token=configuracao.whatsapp_access_token,
+        phone_number_id=configuracao.whatsapp_phone_number_id,
+        app_secret=configuracao.whatsapp_app_secret,
+        base_url=configuracao.whatsapp_api_base_url,
+        timeout_seconds=configuracao.whatsapp_timeout_seconds,
+    )
+    app.state.database_engine = criar_engine(configuracao)
+    app.state.session_factory = criar_fabrica_sessoes(app.state.database_engine)
+    configurar_logging()
+    app.add_middleware(CorrelationMiddleware)
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=configuracao.trusted_hosts)
+    app.add_exception_handler(CnpjInvalidoError, tratar_cnpj_invalido)
+    app.add_exception_handler(HTTPException, tratar_http_exception)
+    app.include_router(criar_router())
+
+    return app
+
+
+app = create_app()
