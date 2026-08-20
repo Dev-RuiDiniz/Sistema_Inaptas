@@ -193,11 +193,6 @@ class PainelAuthService:
         )
         usuario = resultado.scalar_one_or_none()
         if usuario is None:
-            emails_admin = {
-                email.lower() for email in self.settings.panel_bootstrap_admin_emails
-            }
-            if claims.email not in emails_admin:
-                raise OidcError("Usuário não autorizado para esta organização")
             organizacao = await session.get(Organization, self.settings.panel_organization_id)
             if organizacao is None:
                 organizacao = Organization(
@@ -208,16 +203,35 @@ class PainelAuthService:
                 )
                 session.add(organizacao)
                 await session.flush()
-            usuario = PanelUser(
-                organization_id=organizacao.id,
-                oidc_subject=claims.subject,
-                email=claims.email,
-                name=claims.name,
-                role="admin",
-                status="active",
-                email_verified=True,
+            pendente = await session.scalar(
+                select(PanelUser).where(
+                    PanelUser.organization_id == organizacao.id,
+                    PanelUser.email == claims.email,
+                    PanelUser.status == "pending",
+                )
             )
-            session.add(usuario)
+            if pendente is not None:
+                usuario = pendente
+                usuario.oidc_subject = claims.subject
+                usuario.name = claims.name
+                usuario.status = "active"
+                usuario.email_verified = True
+            else:
+                emails_admin = {
+                    email.lower() for email in self.settings.panel_bootstrap_admin_emails
+                }
+                if claims.email not in emails_admin:
+                    raise OidcError("Usuário não autorizado para esta organização")
+                usuario = PanelUser(
+                    organization_id=organizacao.id,
+                    oidc_subject=claims.subject,
+                    email=claims.email,
+                    name=claims.name,
+                    role="admin",
+                    status="active",
+                    email_verified=True,
+                )
+                session.add(usuario)
         elif (
             usuario.status != "active"
             or usuario.organization_id != self.settings.panel_organization_id
