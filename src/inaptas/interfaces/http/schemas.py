@@ -24,11 +24,20 @@ class CompanyData(ModeloBase):
     registration_status_reason: str | None = None
 
 
+class TaxPeriod(ModeloBase):
+    included_at: str | None = None
+    excluded_at: str | None = None
+    source: str | None = None
+    reference_date: str | None = None
+
+
 class TaxData(ModeloBase):
     simple_national: bool | None = None
     simei: bool | None = None
     declared_tax_regime: str | None = None
     pending_obligations: list[str] = Field(default_factory=list)
+    simple_national_history: list[TaxPeriod] = Field(default_factory=list)
+    simei_history: list[TaxPeriod] = Field(default_factory=list)
 
 
 class PgfnData(ModeloBase):
