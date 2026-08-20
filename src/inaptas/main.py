@@ -1,4 +1,6 @@
 import re
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -24,6 +26,17 @@ from inaptas.interfaces.http.routes import criar_router
 _CORRELATION_ID_VALIDO = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    try:
+        yield
+    finally:
+        try:
+            await app.state.redis_store.fechar()
+        finally:
+            await app.state.database_engine.dispose()
+
+
 class CorrelationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         recebido = request.headers.get("X-Correlation-ID", "")
@@ -42,6 +55,7 @@ def create_app(
     app = FastAPI(
         title="Fiscal Gateway — Inaptas",
         version=configuracao.app_version,
+        lifespan=_lifespan,
         docs_url="/docs" if configuracao.openapi_enabled else None,
         redoc_url="/redoc" if configuracao.openapi_enabled else None,
         openapi_url="/openapi.json" if configuracao.openapi_enabled else None,
