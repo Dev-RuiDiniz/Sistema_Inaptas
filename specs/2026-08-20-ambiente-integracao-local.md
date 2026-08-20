@@ -1,6 +1,6 @@
 # Spec — Ambiente e integração local pré-credenciais
 
-**Status:** aprovada para implementação.
+**Status:** implementada tecnicamente; execução do Compose pendente por ausência do Docker.
 
 ## Objetivo
 
@@ -42,3 +42,10 @@ chamadas externas durante os testes automatizados.
 - Em caso de falha, os serviços permanecem preservados para diagnóstico e não
   há publicação automática em `main`.
 
+## Resultado da implementação
+
+- Dockerfile agora inclui Alembic e a imagem pode executar migrations.
+- Compose possui serviço `migrate` e dependência de conclusão antes da API.
+- `scripts/validar-local.ps1` valida Docker, health, autenticação e CNPJ inválido.
+- Testes de integração ficam disponíveis com o marcador `integracao`.
+- Neste ambiente, o script parou corretamente porque Docker não está instalado.

@@ -10,6 +10,7 @@ Projeto do MVP Inaptas: atendimento via WhatsApp e Dify, com um Fiscal Gateway p
 4. [Roadmap](ROADMAP.md)
 5. [Fluxo de especificações SDD](specs/README.md)
 6. [Escopo técnico de origem](escopo_tecnico_inaptas_regularizabr_atualizado.md)
+7. [Guia de validação local](docs/operacao/validacao-local.md)
 
 ## Método de desenvolvimento
 
@@ -17,7 +18,7 @@ O projeto usa Spec-Driven Development (SDD). Toda mudança de produto começa co
 
 ## Estado atual
 
-O bootstrap documental e a base técnica da Fase 1 foram estabelecidos. A próxima frente é validar acessos, titularidade e pré-requisitos externos da Fase 0 para executar a POC e ativar os providers autorizados.
+O bootstrap documental e a base técnica da Fase 1 foram estabelecidos. A preparação local pré-credenciais também está implementada; a próxima frente é validar acessos, titularidade e pré-requisitos externos da Fase 0 para executar a POC e ativar os providers autorizados.
 
 ## Execução local
 
@@ -26,7 +27,17 @@ python -m pip install -e ".[dev]"
 python -m pytest -q
 python -m ruff check src tests
 python -m mypy src
-docker compose up -d --build
+python -m alembic heads
+.\scripts\verificar-seguranca.ps1
+.\scripts\validar-local.ps1
 ```
 
-O Docker Compose sobe a aplicação, PostgreSQL e Redis. A execução do Compose depende de Docker instalado no ambiente.
+Para executar os testes de integração contra os serviços reais do Compose:
+
+```powershell
+$env:EXECUTAR_INTEGRACAO="1"
+python -m pytest tests/integration -m integracao -q
+Remove-Item Env:EXECUTAR_INTEGRACAO -ErrorAction SilentlyContinue
+```
+
+O Docker Compose sobe a migration, a aplicação, PostgreSQL e Redis. A execução depende de Docker Desktop instalado e ativo. Consulte o [guia operacional](docs/operacao/validacao-local.md) para logs, parada dos serviços e diagnóstico.

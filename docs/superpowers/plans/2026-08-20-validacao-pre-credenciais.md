@@ -19,12 +19,12 @@
 
 ## Tarefas
 
-- [ ] Preparar Docker Compose, migration e roteiro `scripts/validar-local.ps1`.
-- [ ] Implementar healthcheck real de PostgreSQL e Redis.
-- [ ] Ampliar testes mockados do fluxo fiscal sem credenciais.
-- [ ] Criar testes de integração marcados como `integracao`.
-- [ ] Endurecer configuração de produção e criar verificação de secrets.
-- [ ] Documentar operação local, critérios e bloqueios no ROADMAP/MEMORY.
+- [x] Preparar Docker Compose, migration e roteiro `scripts/validar-local.ps1`.
+- [x] Implementar healthcheck real de PostgreSQL e Redis.
+- [x] Ampliar testes mockados do fluxo fiscal sem credenciais.
+- [x] Criar testes de integração marcados como `integracao`.
+- [x] Endurecer configuração de produção e criar verificação de secrets.
+- [x] Documentar operação local, critérios e bloqueios no ROADMAP/MEMORY.
 - [ ] Executar a validação final, revisar o histórico e publicar a branch.
 
 ## Regras por tarefa
@@ -46,4 +46,3 @@
 - `test(integracao): validar serviços locais do Compose`
 - `feat(seguranca): endurecer configuração e verificação local`
 - `docs: documentar operação e validação pré-credenciais`
-

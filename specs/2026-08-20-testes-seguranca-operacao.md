@@ -1,6 +1,6 @@
 # Spec — Testes, segurança e operação pré-credenciais
 
-**Status:** aprovada para implementação.
+**Status:** implementada tecnicamente; homologação real externa pendente.
 
 ## Objetivo
 
@@ -52,3 +52,12 @@ logs redigidos e operação local reproduzível.
 - O push final será somente para
   `origin/funcionalidade/validacao-pre-credenciais`.
 
+## Resultado da implementação
+
+- Foram adicionados cenários mockados para providers, integrações, autenticação,
+  CNPJ alfanumérico, indisponibilidade e diagnóstico determinístico.
+- O healthcheck verifica PostgreSQL e Redis sem expor detalhes internos.
+- Produção rejeita token padrão, OpenAPI habilitado e Trusted Host wildcard.
+- Logs redigem credenciais Dify, WhatsApp, Authorization e tokens internos.
+- O scanner local não encontrou padrões de credenciais nos arquivos versionados.
+- A execução contra PostgreSQL/Redis reais aguarda Docker Desktop.
