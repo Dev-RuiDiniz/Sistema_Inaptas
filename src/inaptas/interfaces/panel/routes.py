@@ -5,9 +5,11 @@ from typing import Annotated
 from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.exc import SQLAlchemyError
+from starlette.responses import Response
 
 from inaptas.domain.cnpj import CnpjInvalidoError
 from inaptas.interfaces.panel.auth import PainelSession, obter_sessao_painel, validar_csrf
+from inaptas.interfaces.panel.relatorios import gerar_csv, gerar_pdf
 
 
 async def _sessao_html(request: Request) -> PainelSession | RedirectResponse:
@@ -133,6 +135,46 @@ def criar_router_painel() -> APIRouter:
             request=request,
             name="painel/detalhe_consulta.html",
             context={"sessao": sessao, "consulta": consulta, "resposta": resposta},
+        )
+
+    @router.get("/painel/consultas/{consultation_id}/relatorio.pdf")
+    async def relatorio_pdf(request: Request, consultation_id: str) -> Response:
+        sessao = await _sessao_html(request)
+        if isinstance(sessao, RedirectResponse):
+            return sessao
+        async with request.app.state.session_factory() as session:
+            registro = await request.app.state.panel_consultas.obter(
+                session, consultation_id, sessao.organization_id
+            )
+        if registro is None:
+            return Response(status_code=404)
+        consulta, resposta = registro
+        return Response(
+            content=gerar_pdf(consulta, resposta),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="relatorio-{resposta.cnpj}.pdf"'
+            },
+        )
+
+    @router.get("/painel/consultas/{consultation_id}/relatorio.csv")
+    async def relatorio_csv(request: Request, consultation_id: str) -> Response:
+        sessao = await _sessao_html(request)
+        if isinstance(sessao, RedirectResponse):
+            return sessao
+        async with request.app.state.session_factory() as session:
+            registro = await request.app.state.panel_consultas.obter(
+                session, consultation_id, sessao.organization_id
+            )
+        if registro is None:
+            return Response(status_code=404)
+        consulta, resposta = registro
+        return Response(
+            content=gerar_csv(consulta, resposta),
+            media_type="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="relatorio-{resposta.cnpj}.csv"'
+            },
         )
 
     return router
