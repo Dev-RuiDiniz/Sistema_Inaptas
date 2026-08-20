@@ -1,0 +1,44 @@
+# Ambientes e variáveis locais
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build e distribuição
+build/
+dist/
+*.egg-info/
+
+# IDE e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs, temporários e dados locais
+*.log
+logs/
+tmp/
+temp/
+data/local/
+
+# Credenciais e certificados
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
