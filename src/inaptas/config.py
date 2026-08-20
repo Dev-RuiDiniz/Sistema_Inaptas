@@ -15,8 +15,11 @@ class Settings(BaseSettings):
     whatsapp_app_secret: str = ""
     whatsapp_access_token: str = ""
     whatsapp_phone_number_id: str = ""
+    whatsapp_api_base_url: str = "https://graph.facebook.com"
+    whatsapp_timeout_seconds: float = 10.0
     dify_base_url: str = ""
     dify_api_key: str = ""
+    dify_timeout_seconds: float = 10.0
     trusted_hosts: list[str] = ["localhost", "127.0.0.1"]
     openapi_enabled: bool = True
 

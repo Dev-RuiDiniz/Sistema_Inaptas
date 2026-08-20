@@ -13,6 +13,8 @@ from inaptas.config import Settings, get_settings
 from inaptas.domain.cnpj import CnpjInvalidoError
 from inaptas.infrastructure.cache.redis_store import RedisStore
 from inaptas.infrastructure.health import HealthState
+from inaptas.infrastructure.integrations.dify import DifyClient
+from inaptas.infrastructure.integrations.whatsapp import WhatsAppClient
 from inaptas.infrastructure.observability.logging import configurar_logging
 from inaptas.infrastructure.persistence.database import criar_engine, criar_fabrica_sessoes
 from inaptas.interfaces.http.dependencies import criar_servico
@@ -49,6 +51,18 @@ def create_app(
     app.state.health_state = HealthState()
     app.state.redis_client = Redis.from_url(configuracao.redis_url)
     app.state.redis_store = RedisStore(app.state.redis_client, app.state.health_state)
+    app.state.dify_client = DifyClient(
+        configuracao.dify_base_url,
+        configuracao.dify_api_key,
+        configuracao.dify_timeout_seconds,
+    )
+    app.state.whatsapp_client = WhatsAppClient(
+        access_token=configuracao.whatsapp_access_token,
+        phone_number_id=configuracao.whatsapp_phone_number_id,
+        app_secret=configuracao.whatsapp_app_secret,
+        base_url=configuracao.whatsapp_api_base_url,
+        timeout_seconds=configuracao.whatsapp_timeout_seconds,
+    )
     app.state.database_engine = criar_engine(configuracao)
     app.state.session_factory = criar_fabrica_sessoes(app.state.database_engine)
     configurar_logging()

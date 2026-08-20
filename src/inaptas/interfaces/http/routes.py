@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from typing import Annotated
+import secrets
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from redis.exceptions import RedisError
+from starlette.responses import PlainTextResponse
 
 from inaptas.application.services import FiscalGatewayService
+from inaptas.infrastructure.integrations.webhooks import extrair_evento_id
 from inaptas.interfaces.http.dependencies import exigir_token_interno, obter_servico
 from inaptas.interfaces.http.schemas import CompanyLookupRequest, FiscalResponse
 
@@ -65,5 +69,54 @@ def criar_router() -> APIRouter:
         servico: Annotated[FiscalGatewayService, Depends(obter_servico)],
     ) -> FiscalResponse:
         return await servico.consulta_completa(payload.cnpj)
+
+    @router.get("/webhooks/whatsapp")
+    async def whatsapp_verification(
+        request: Request,
+        hub_mode: Annotated[str | None, Query(alias="hub.mode")] = None,
+        hub_verify_token: Annotated[str | None, Query(alias="hub.verify_token")] = None,
+        hub_challenge: Annotated[str | None, Query(alias="hub.challenge")] = None,
+    ) -> PlainTextResponse:
+        esperado = request.app.state.settings.whatsapp_verify_token
+        if (
+            hub_mode != "subscribe"
+            or not esperado
+            or not hub_verify_token
+            or not secrets.compare_digest(hub_verify_token, esperado)
+            or hub_challenge is None
+        ):
+            raise HTTPException(status_code=403, detail="Verificação inválida")
+        return PlainTextResponse(hub_challenge)
+
+    @router.post("/webhooks/whatsapp")
+    async def whatsapp_webhook(request: Request, payload: dict[str, Any]) -> dict[str, object]:
+        corpo = await request.body()
+        cliente_whatsapp = request.app.state.whatsapp_client
+        assinatura = request.headers.get("X-Hub-Signature-256")
+        if not cliente_whatsapp.validar_assinatura(corpo, assinatura):
+            raise HTTPException(status_code=401, detail="Assinatura inválida")
+
+        evento_id = extrair_evento_id(payload)
+        if evento_id is None:
+            raise HTTPException(status_code=400, detail="Evento sem identificador")
+
+        try:
+            primeiro_evento = await request.app.state.redis_store.adquirir_idempotencia(
+                f"whatsapp:evento:{evento_id}"
+            )
+        except RedisError as exc:
+            request.app.state.health_state.definir("redis", "unavailable")
+            raise HTTPException(status_code=503, detail="Idempotência indisponível") from exc
+
+        if not primeiro_evento:
+            return {"status": "duplicate", "event_id": evento_id}
+
+        resultado = await request.app.state.dify_client.enviar_contexto(payload)
+        return {
+            "status": "processed",
+            "event_id": evento_id,
+            "dify_status": resultado.status,
+            "dify_error_code": resultado.error_code,
+        }
 
     return router
