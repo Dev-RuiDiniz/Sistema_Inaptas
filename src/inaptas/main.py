@@ -56,6 +56,19 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
         return resposta
 
 
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        resposta = await call_next(request)
+        resposta.headers["Content-Security-Policy"] = (
+            "default-src 'self'; style-src 'self'; script-src 'self'; "
+            "img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        )
+        resposta.headers["X-Frame-Options"] = "DENY"
+        resposta.headers["Referrer-Policy"] = "no-referrer"
+        resposta.headers["X-Content-Type-Options"] = "nosniff"
+        return resposta
+
+
 def create_app(
     settings: Settings | None = None,
     service: FiscalGatewayService | None = None,
@@ -95,6 +108,7 @@ def create_app(
     app.state.session_factory = criar_fabrica_sessoes(app.state.database_engine)
     configurar_logging()
     app.add_middleware(CorrelationMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=configuracao.trusted_hosts)
     app.add_exception_handler(CnpjInvalidoError, tratar_cnpj_invalido)
     app.add_exception_handler(HTTPException, tratar_http_exception)
