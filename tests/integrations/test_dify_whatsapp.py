@@ -39,3 +39,11 @@ async def test_integracao_sem_credencial_retorna_indisponivel() -> None:
 
     assert resultado.status == "unavailable"
     assert resultado.error_code == "integration_not_configured"
+
+
+@pytest.mark.asyncio
+async def test_whatsapp_sem_credencial_retorna_indisponivel() -> None:
+    resultado = await WhatsAppClient().enviar_texto("5511999999999", "teste")
+
+    assert resultado.status == "unavailable"
+    assert resultado.error_code == "integration_not_configured"
