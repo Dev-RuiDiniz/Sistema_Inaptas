@@ -40,5 +40,11 @@ data/local/
 *.key
 *.p12
 *.pfx
+*.crt
+*.cer
 secrets/
 credentials/
+
+# Dados locais de bancos
+*.db
+*.sqlite3

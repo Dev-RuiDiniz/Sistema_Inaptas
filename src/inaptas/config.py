@@ -2,11 +2,17 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+TOKEN_LOCAL_PADRAO = "troque-este-token-local"
+
+
+class ConfiguracaoInseguraError(ValueError):
+    """Indica uma configuração incompatível com ambiente de produção."""
+
 
 class Settings(BaseSettings):
     app_env: str = "local"
     app_version: str = "0.1.0"
-    internal_api_token: str = "troque-este-token-local"
+    internal_api_token: str = TOKEN_LOCAL_PADRAO
     database_url: str = "postgresql+asyncpg://inaptas:inaptas@localhost:5432/inaptas"
     redis_url: str = "redis://localhost:6379/0"
     receitaws_base_url: str = "https://www.receitaws.com.br"
@@ -32,3 +38,14 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def validar_configuracao(settings: Settings) -> None:
+    if settings.app_env.lower() not in {"prod", "production"}:
+        return
+    if not settings.internal_api_token or settings.internal_api_token == TOKEN_LOCAL_PADRAO:
+        raise ConfiguracaoInseguraError("INTERNAL_API_TOKEN deve ser definido em produção")
+    if settings.openapi_enabled:
+        raise ConfiguracaoInseguraError("OPENAPI_ENABLED deve ser false em produção")
+    if not settings.trusted_hosts or "*" in settings.trusted_hosts:
+        raise ConfiguracaoInseguraError("TRUSTED_HOSTS não pode aceitar wildcard em produção")

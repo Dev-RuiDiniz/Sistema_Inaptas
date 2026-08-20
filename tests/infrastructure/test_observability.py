@@ -14,3 +14,17 @@ def test_redige_token_de_logs() -> None:
 
     assert evento["authorization"] == "[REDACTED]"
     assert evento["status"] == "ok"
+
+
+def test_redige_credenciais_das_integracoes() -> None:
+    evento = redigir_segredos(
+        {
+            "whatsapp_access_token": "token-whatsapp",
+            "whatsapp_app_secret": "segredo-whatsapp",
+            "nested": {"dify_api_key": "chave-dify"},
+        }
+    )
+
+    assert evento["whatsapp_access_token"] == "[REDACTED]"
+    assert evento["whatsapp_app_secret"] == "[REDACTED]"
+    assert evento["nested"]["dify_api_key"] == "[REDACTED]"

@@ -11,7 +11,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from inaptas.application.services import FiscalGatewayService
-from inaptas.config import Settings, get_settings
+from inaptas.config import Settings, get_settings, validar_configuracao
 from inaptas.domain.cnpj import CnpjInvalidoError
 from inaptas.infrastructure.cache.redis_store import RedisStore
 from inaptas.infrastructure.health import HealthState
@@ -52,6 +52,7 @@ def create_app(
     service: FiscalGatewayService | None = None,
 ) -> FastAPI:
     configuracao = settings or get_settings()
+    validar_configuracao(configuracao)
     app = FastAPI(
         title="Fiscal Gateway — Inaptas",
         version=configuracao.app_version,
