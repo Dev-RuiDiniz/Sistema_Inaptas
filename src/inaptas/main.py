@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
@@ -10,6 +11,10 @@ from starlette.responses import Response
 from inaptas.application.services import FiscalGatewayService
 from inaptas.config import Settings, get_settings
 from inaptas.domain.cnpj import CnpjInvalidoError
+from inaptas.infrastructure.cache.redis_store import RedisStore
+from inaptas.infrastructure.health import HealthState
+from inaptas.infrastructure.observability.logging import configurar_logging
+from inaptas.infrastructure.persistence.database import criar_engine, criar_fabrica_sessoes
 from inaptas.interfaces.http.dependencies import criar_servico
 from inaptas.interfaces.http.errors import tratar_cnpj_invalido, tratar_http_exception
 from inaptas.interfaces.http.routes import criar_router
@@ -41,6 +46,12 @@ def create_app(
     )
     app.state.settings = configuracao
     app.state.gateway_service = service or criar_servico(configuracao)
+    app.state.health_state = HealthState()
+    app.state.redis_client = Redis.from_url(configuracao.redis_url)
+    app.state.redis_store = RedisStore(app.state.redis_client, app.state.health_state)
+    app.state.database_engine = criar_engine(configuracao)
+    app.state.session_factory = criar_fabrica_sessoes(app.state.database_engine)
+    configurar_logging()
     app.add_middleware(CorrelationMiddleware)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=configuracao.trusted_hosts)
     app.add_exception_handler(CnpjInvalidoError, tratar_cnpj_invalido)

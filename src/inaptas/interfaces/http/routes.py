@@ -15,10 +15,11 @@ def criar_router() -> APIRouter:
     @router.get("/health")
     async def health(request: Request) -> dict[str, object]:
         settings = request.app.state.settings
+        health_state = request.app.state.health_state.snapshot()
         return {
-            "status": "ok",
+            "status": health_state["status"],
             "version": settings.app_version,
-            "dependencies": {"postgres": "unknown", "redis": "unknown"},
+            "dependencies": health_state["dependencies"],
         }
 
     @router.post(
