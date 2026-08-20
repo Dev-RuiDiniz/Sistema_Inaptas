@@ -39,6 +39,9 @@ addopts = "-ra"
 asyncio_mode = "auto"
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+    "integracao: testes opcionais contra os serviços locais do Docker Compose",
+]
 
 [tool.ruff]
 line-length = 100
