@@ -1,0 +1,13 @@
+{% extends "painel/base.html" %}
+{% block title %}{{ titulo|default("Acesso do escritório") }} — Sistema Inaptas{% endblock %}
+{% block body %}
+<main class="auth-shell">
+  <section class="auth-panel" aria-labelledby="titulo-login">
+    <p class="eyebrow">Sistema Inaptas</p>
+    <h1 id="titulo-login">{{ titulo|default("Acesso do escritório") }}</h1>
+    <p class="lede">{{ mensagem|default("Consulte evidências cadastrais com rastreabilidade.") }}</p>
+    {% if erro %}<p class="alert alert-error" role="alert">{{ erro }}</p>{% endif %}
+    <a class="button button-primary" href="/painel/login/iniciar">Entrar com a conta do escritório</a>
+  </section>
+</main>
+{% endblock %}

@@ -31,6 +31,18 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     trusted_hosts: list[str] = ["localhost", "127.0.0.1"]
     openapi_enabled: bool = True
+    panel_enabled: bool = False
+    panel_session_ttl_seconds: int = 3_600
+    panel_session_cookie_name: str = "inaptas_panel_session"
+    panel_session_secure: bool = False
+    panel_organization_id: str = "00000000-0000-0000-0000-000000000001"
+    panel_organization_name: str = "Escritório de contabilidade"
+    panel_bootstrap_admin_emails: list[str] = []
+    oidc_issuer_url: str = ""
+    oidc_client_id: str = ""
+    oidc_client_secret: str = ""
+    oidc_redirect_uri: str = ""
+    oidc_scopes: str = "openid email profile"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -1,10 +1,12 @@
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.staticfiles import StaticFiles
 from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
@@ -22,6 +24,7 @@ from inaptas.infrastructure.persistence.database import criar_engine, criar_fabr
 from inaptas.interfaces.http.dependencies import criar_servico
 from inaptas.interfaces.http.errors import tratar_cnpj_invalido, tratar_http_exception
 from inaptas.interfaces.http.routes import criar_router
+from inaptas.interfaces.panel.templates import criar_templates
 
 _CORRELATION_ID_VALIDO = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
@@ -62,6 +65,7 @@ def create_app(
         openapi_url="/openapi.json" if configuracao.openapi_enabled else None,
     )
     app.state.settings = configuracao
+    app.state.panel_templates = criar_templates()
     app.state.gateway_service = service or criar_servico(configuracao)
     app.state.health_state = HealthState()
     app.state.redis_client = Redis.from_url(configuracao.redis_url)
@@ -86,6 +90,11 @@ def create_app(
     app.add_exception_handler(CnpjInvalidoError, tratar_cnpj_invalido)
     app.add_exception_handler(HTTPException, tratar_http_exception)
     app.include_router(criar_router())
+    app.mount(
+        "/painel/static",
+        StaticFiles(directory=str(Path(__file__).parent / "interfaces" / "panel" / "static")),
+        name="painel_static",
+    )
 
     return app
 
