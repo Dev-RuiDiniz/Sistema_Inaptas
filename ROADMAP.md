@@ -2,163 +2,217 @@
 
 ## Como acompanhar
 
-Este documento acompanha a execução do produto. Cada item deve ser marcado somente depois de validado, e não apenas quando o código for escrito.
+Este documento acompanha execução, homologação e publicação. Um item só pode ser marcado após a evidência correspondente, não apenas quando o código ou documento foi escrito.
 
 - `[ ]` pendente
 - `[-]` em andamento
 - `[x]` concluído
 - `[!]` bloqueado por dependência ou decisão externa
 
-Para cada fase, registre a data de conclusão, a evidência e os bloqueios relevantes. Mudanças de escopo devem passar por uma spec e atualizar o `PRD.md`.
+Estados de specs e tarefas: `DRAFT`, `EM_REVISÃO`, `APROVADA`, `EM_IMPLEMENTAÇÃO`, `EM_HOMOLOGAÇÃO`, `CONCLUÍDA` e `CANCELADA`. As transições e o DoR/DoD estão em [`AGENTS.md`](AGENTS.md).
 
-## Visão do produto
+## Visão do produto e do MVP
 
-O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.br. Seu MVP recebe uma solicitação pelo WhatsApp, usa o Dify para conduzir a conversa, consulta o Fiscal Gateway e devolve dados fiscais/cadastrais normalizados, rastreáveis e sem inferências indevidas da IA.
+O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.br. O MVP reduz o tempo de triagem cadastral e fiscal de escritórios contábeis, com resposta rastreável e sem inferências indevidas da IA.
+
+O MVP operacional é composto por:
+
+- canal público WhatsApp Business Cloud API e orquestração Dify;
+- Fiscal Gateway com contrato canônico e diagnóstico determinístico;
+- providers cadastrais e fiscais isolados, começando por ReceitaWS;
+- painel operacional do escritório, com OIDC, RBAC, consultas, histórico, relatórios e auditoria;
+- persistência PostgreSQL, cache/sessão/rate limit Redis, Docker e documentação.
+
+Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-especificacao-mae.md) e [`MEMORY.md`](MEMORY.md).
+
+## Estado real em 21/08/2026
+
+| Dimensão | Estado | Evidência ou bloqueio |
+|---|---|---|
+| Implementação técnica do gateway e painel | `CONCLUÍDA` tecnicamente | Código na branch atual e testes automatizados. |
+| Validação automatizada | `CONCLUÍDA` | 66 testes aprovados. |
+| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | 1 teste de integração pulado por Docker ausente no ambiente atual. |
+| Homologação Meta/WhatsApp e Dify | Pendente externo | Contas, números, projetos e credenciais do contratante. |
+| Homologação OIDC do painel | Pendente externo | Issuer, client, callback, grupos e Redis do cliente. |
+| Homologação ReceitaWS | Pendente externo | Contratação, limites e CNPJ de teste autorizado. |
+| Homologação SERPRO/PGFN | Pendente externo | Contrato, e-CNPJ, credenciais e autorizações aplicáveis. |
+| Produção | Bloqueada por dependências | Não liberar antes das homologações e da POC autorizada. |
+
+O painel é parte do MVP operacional. Implementação técnica concluída não significa homologação externa nem disponibilidade em produção.
+
+## Épicos do MVP
+
+### Épico 1 — Canal público e orquestração
+
+WhatsApp recebe eventos idempotentes, o Dify conduz a conversa sem secrets fiscais e o usuário recebe explicação baseada em evidências.
+
+Checklist: webhook verificado; assinatura validada; deduplicação; solicitação de CNPJ; resposta segura; Dify configurado somente após credenciais e prompt aprovados.
+
+### Épico 2 — Fiscal Gateway e fontes
+
+O gateway normaliza CNPJ numérico e alfanumérico como string, consulta providers habilitados e separa `source_data`, `system_diagnosis` e `ai_interpretation`.
+
+Checklist: contrato canônico; ReceitaWS inicial; extensões SERPRO/PGFN/SITFIS/ADE; status de provider; timeout/retry/cache/rate limit; auditoria; POC com CNPJ autorizado.
+
+### Épico 3 — Painel operacional do escritório
+
+O painel permite login OIDC, RBAC, consulta manual, histórico, detalhe, exportação PDF/CSV, dashboard, usuários, retenção e auditoria por organização.
+
+Checklist: sessão Redis; CSRF; isolamento por organização; papéis `admin` e `operator`; bloqueio do último administrador; relatórios normalizados; retenção inicial de 90 dias; OIDC real homologado.
+
+### Épico 4 — Segurança, operação e publicação
+
+O produto mantém secrets no servidor, logs redigidos, HTTPS em exposição, healthcheck, correlation ID, documentação, testes e processo de publicação reproduzível.
+
+Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorização; backup/retenção; diff revisado; commits por tarefa; merge sem squash; push confirmado.
+
+## Tarefas de consolidação documental
+
+| ID | Tarefa | Arquivo/entrega | Estado | Commit correspondente |
+|---|---|---|---|---|
+| `TASK-MVP-001` | Criar spec-mãe | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` | `[x]` concluída | `docs(specs): consolidar especificação mestre do mvp` |
+| `TASK-MVP-002` | Organizar índice e specs históricas | `specs/README.md` e seis specs datadas | `[x]` concluída | `docs(specs): organizar índice e histórico de especificações` |
+| `TASK-MVP-003` | Atualizar governança | `AGENTS.md` | `[x]` concluída | `docs(governanca): alinhar regras de execução e publicação` |
+| `TASK-MVP-004` | Atualizar roadmap e memória | `ROADMAP.md` e `MEMORY.md` | `[-]` em andamento | `docs(roadmap): registrar escopo e estado do mvp` |
+| `TASK-MVP-005` | Atualizar visão comercial | `README.md` | `[ ]` pendente | `docs(readme): apresentar visão comercial do mvp` |
+| `TASK-MVP-006` | Validar documentação e publicar | evidências, validações e `origin/main` | `[ ]` pendente | `docs: registrar validação documental do mvp` |
 
 ## Marco 0 — Governança e base SDD
 
-**Status:** concluído em 20/08/2026.
+**Estado:** `EM_IMPLEMENTAÇÃO` durante a consolidação; governança inicial criada em 20/08/2026.
 
-- [x] Criar `AGENTS.md` com regras de SDD, Git, segurança e Definition of Done.
-- [x] Criar `PRD.md` com o produto, requisitos e critérios de aceite.
-- [x] Criar `ROADMAP.md` com fases, dependências e critérios de aceite.
-- [x] Criar `MEMORY.md` com o contexto persistido do projeto.
-- [x] Criar `specs/README.md` com o fluxo de especificações.
-- [x] Atualizar `README.md` como índice do repositório.
-- [x] Versionar o escopo técnico de origem.
+- [x] `AGENTS.md` com SDD, estados, Git, segurança, DoR e DoD.
+- [x] `PRD.md` com produto, requisitos e critérios macro.
+- [x] `ROADMAP.md` com fases, épicos, tarefas, dependências e evidências.
+- [x] `MEMORY.md` com contexto persistido e histórico append-only.
+- [x] `specs/README.md` e spec-mãe com rastreabilidade.
+- [x] `README.md` com visão técnica e comercial.
+- [x] Escopo técnico de origem versionado.
 
-**Critérios de aceite:** os documentos existem, estão em pt-BR, apontam uns para os outros, não contêm secrets e definem o fluxo SDD antes do primeiro incremento de código.
+## Fase 0 — Acessos e pré-requisitos externos
 
-## Fase 0 — Validação de acessos e pré-requisitos
-
-**Status:** pendente.
+**Estado:** pendente externo.
 
 - [ ] Confirmar conta Meta Business e permissões administrativas.
 - [ ] Confirmar número e credenciais da WhatsApp Business Cloud API.
-- [ ] Confirmar ambiente, projeto e chave da API do Dify.
-- [ ] Confirmar fonte cadastral disponível para o MVP, começando por ReceitaWS se contratada.
+- [ ] Confirmar ambiente, projeto, prompt e chave da API do Dify.
+- [ ] Confirmar fonte cadastral do MVP, começando por ReceitaWS se contratada.
 - [ ] Confirmar e-CNPJ, contrato SERPRO e credenciais de homologação, quando aplicável.
-- [ ] Confirmar contratação/permissão da consulta PGFN.
+- [ ] Confirmar contratação e permissão da consulta PGFN.
 - [ ] Confirmar procurações ou autorizações necessárias para dados fiscais protegidos.
-- [ ] Definir CNPJ de teste autorizado para a POC, sem armazená-lo em código ou documentação pública.
-- [ ] Registrar titularidade das contas e ativos em nome do contratante.
+- [ ] Definir CNPJ de teste autorizado para a POC sem armazená-lo no Git.
+- [ ] Registrar titularidade de contas e ativos em nome do contratante.
+- [ ] Confirmar issuer OIDC, client, callbacks, grupos e política de retenção do cliente.
 
-**Critérios de aceite:** cada dependência possui responsável, status, evidência de acesso ou bloqueio documentado; nenhum secret é colocado no Git; existe um CNPJ real autorizado para demonstrar `CNPJ → Fiscal Gateway → fonte → retorno estruturado`.
+**Critério de aceite:** cada dependência possui responsável, estado, evidência segura ou bloqueio documentado; não há secret no Git; existe autorização para demonstrar `CNPJ → Fiscal Gateway → fonte → retorno estruturado`.
 
 ## Preparação pré-credenciais — validação local
 
-**Status:** implementação técnica concluída; execução do Compose depende de Docker Desktop.
+**Estado:** implementação técnica `CONCLUÍDA`; homologação local `EM_HOMOLOGAÇÃO` por ausência do Docker.
 
-- [x] Criar specs de ambiente local, testes, segurança e operação.
-- [x] Preparar migration automática no Docker Compose.
-- [x] Criar script PowerShell de validação local sem impressão de secrets.
-- [x] Implementar healthcheck real de PostgreSQL e Redis.
-- [x] Ampliar testes mockados sem chamadas externas reais.
-- [x] Criar testes opcionais de integração marcados como `integracao`.
-- [x] Endurecer configuração de produção e redaction de logs.
-- [x] Criar scanner de possíveis secrets em arquivos versionados.
-- [x] Documentar operação, comandos e bloqueios.
-- [!] Executar Compose e testes de integração com PostgreSQL/Redis reais — Docker não instalado no ambiente atual.
+- [x] Specs de ambiente, segurança e operação.
+- [x] Migration automática no Compose.
+- [x] Script PowerShell de validação sem impressão de secrets.
+- [x] Healthcheck de PostgreSQL e Redis.
+- [x] Testes mockados sem chamadas externas reais.
+- [x] Testes opcionais de integração marcados como `integracao`.
+- [x] Configuração de produção e redaction de logs endurecidos.
+- [x] Scanner de possíveis secrets em arquivos versionados.
+- [x] Documentação de operação, comandos e bloqueios.
+- [!] Executar Compose e integração com PostgreSQL/Redis reais — Docker não está instalado no ambiente atual.
 
-**Critérios de aceite:** testes mockados, Ruff, MyPy e scanner de segurança aprovados; Compose validado quando Docker estiver disponível; ausência do Docker permanece documentada como bloqueio, sem marcar a integração local como concluída.
+**Evidências:** `python -m pytest -q` com 66 aprovados e 1 integração pulada; Ruff, MyPy, Alembic e scanner de segurança aprovados.
 
-## Fase 1 — MVP Inaptas
+## Fase 1 — MVP público e painel operacional
 
-**Status:** concluída tecnicamente; POC e validação do Compose aguardam dependências do ambiente/Fase 0.
+**Estado:** implementação técnica `CONCLUÍDA`; MVP completo `EM_HOMOLOGAÇÃO`.
 
-- [x] Criar a base FastAPI do Fiscal Gateway.
-- [x] Definir modelos Pydantic e contrato JSON normalizado.
-- [x] Implementar normalização e validação de CNPJ numérico e alfanumérico.
-- [x] Implementar conector cadastral desacoplado.
-- [x] Retornar situação cadastral, motivo, data, Simples Nacional atual e SIMEI/MEI atual quando disponíveis.
-- [x] Implementar diagnóstico determinístico separado de `source_data` e `ai_interpretation`.
-- [x] Preparar conector/interface de PGFN e ativá-lo quando houver acesso válido.
-- [x] Preparar estrutura para histórico de Simples Nacional e SIMEI/MEI sem inventar dados.
-- [x] Preparar interface futura para SITFIS e ADE/Editais.
-- [x] Implementar `GET /health` e endpoints internos definidos no PRD.
-- [x] Implementar logs estruturados, correlation ID, auditoria mínima, cache e rate limit.
-- [x] Integrar o backend ao Dify sem expor credenciais fiscais.
-- [x] Integrar o webhook da WhatsApp Cloud API com idempotência e deduplicação.
-- [x] Criar Docker/Compose e documentação de configuração segura.
-- [!] Executar POC com CNPJ real autorizado antes da segunda parcela — depende da Fase 0 e das contas externas.
+- [x] Base FastAPI do Fiscal Gateway e modelos Pydantic.
+- [x] Normalização e validação de CNPJ numérico e alfanumérico.
+- [x] Conector cadastral desacoplado e resposta canônica.
+- [x] Diagnóstico determinístico separado das camadas de evidência e IA.
+- [x] Interfaces PGFN, SITFIS e ADE/Editais sem ativação indevida.
+- [x] `/health`, endpoints de consulta e webhook WhatsApp.
+- [x] Logs estruturados, correlation ID, auditoria, cache, rate limit e idempotência.
+- [x] Integrações preparadas para Dify e WhatsApp sem expor credenciais fiscais.
+- [x] Docker/Compose e documentação de configuração segura.
+- [x] OIDC, RBAC, sessão Redis, painel, consultas, histórico e relatórios.
+- [x] Dashboard operacional e administração de usuários/retenção.
+- [!] POC com CNPJ real autorizado — depende da Fase 0.
+- [!] Login contra OIDC real e PostgreSQL/Redis reais — depende de credenciais e Docker.
 
-**Critérios de aceite:** CNPJ válido retorna JSON normalizado; CNPJ inválido é rejeitado; CNPJ alfanumérico é aceito; indisponibilidade nunca vira resposta fiscal falsa; webhook duplicado não duplica consulta; secrets não aparecem em frontend ou logs; o fluxo WhatsApp → Dify → backend → fonte → resposta está preparado e será demonstrado quando as contas estiverem disponíveis.
-
-**Evidências técnicas:** 53 testes passaram e 1 teste de integração foi pulado por ausência do Docker; Ruff, MyPy, scanner de segurança e Alembic `0001_base` foram aprovados; Docker Compose criado, mas não executado porque o comando Docker não está instalado neste ambiente.
-
-## Painel interno do escritório — incremento da Fase 1
-
-**Status:** implementação técnica concluída em 20/08/2026; ativação depende de OIDC e validação dos serviços locais.
-
-- [x] Especificar autenticação, RBAC, consultas, relatórios e dashboard em SDD.
-- [x] Preparar FastAPI/Jinja2, CSS, JavaScript progressivo e configuração server-side.
-- [x] Implementar OIDC com PKCE, state, nonce, JWKS, sessões Redis e bootstrap de administrador.
-- [x] Implementar papéis `admin` e `operator`, CSRF, cookies seguros e headers de segurança.
-- [x] Criar organizações, usuários, resultados normalizados, auditoria e retenção.
-- [x] Implementar consulta manual, histórico isolado por organização e exportações PDF/CSV.
-- [x] Implementar dashboard operacional com indisponibilidade explícita.
-- [x] Implementar gestão de usuários, convite pendente, retenção e bloqueio do último administrador.
-- [x] Criar testes de templates, OIDC/PKCE, persistência, relatórios, dashboard e segurança.
-- [!] Validar login contra OIDC do cliente e PostgreSQL/Redis reais — depende da Fase 0 e do Docker disponível.
-
-**Critérios de aceite:** usuário não autenticado é direcionado ao login; RBAC é aplicado no backend; consultas e relatórios permanecem limitados à organização; indisponibilidade não vira regularidade fiscal; POSTs exigem CSRF; ações administrativas geram auditoria; nenhum secret chega ao HTML ou aos relatórios.
-
-**Evidências:** commits `41760ed`, `b13ccc8`, `ae22add`, `35356ef`, `a5854c5`, `0bb459c` e `4c28564`; testes do painel, Ruff e MyPy aprovados. O login real e o Compose continuam bloqueados por dependências externas/ambiente.
+**Critérios de aceite:** CNPJ válido produz contrato canônico; inválido é rejeitado; formato alfanumérico é aceito; indisponibilidade permanece explícita; webhook duplicado não duplica consulta; secrets não aparecem no frontend, Dify ou logs; painel aplica RBAC e isolamento; relatórios preservam fonte, status e diagnóstico.
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 
-**Status:** pendente.
+**Estado:** pendente externo e de implementação condicionada.
 
-- [ ] Implementar OAuth2 `client_credentials` para os serviços autorizados.
-- [ ] Integrar Consulta CNPJ oficial do SERPRO conforme contrato e Swagger vigente.
-- [ ] Integrar Consulta Dívida Ativa da União da PGFN/SERPRO.
-- [ ] Implementar renovação de token, retry com backoff, circuit breaker e tratamento de 401, 403, 429 e 5xx.
-- [ ] Configurar prioridades e fallback entre SERPRO, fonte alternativa e cache válido.
-- [ ] Homologar respostas com credenciais e dados autorizados.
-
-**Critérios de aceite:** tokens não são persistidos em texto puro; 401 renova credencial de forma controlada; 403/429/5xx possuem resposta segura; PGFN indisponível é reportada como indisponibilidade; cada bloco informa sua fonte e status.
+- [ ] OAuth2 `client_credentials` conforme contrato autorizado.
+- [ ] Consulta CNPJ oficial SERPRO conforme Swagger vigente.
+- [ ] Consulta Dívida Ativa da União da PGFN/SERPRO.
+- [ ] Renovação de token, retry controlado e respostas para 401, 403, 429 e 5xx.
+- [ ] Prioridade, fallback e cache válido entre fontes.
+- [ ] Homologação com credenciais e dados autorizados.
 
 ## Fase 3 — Fiscal avançado
 
-**Status:** pendente.
+**Estado:** futuro, fora do MVP atual.
 
-- [ ] Integrar Integra Contador quando contrato, certificado e autorização estiverem disponíveis.
-- [ ] Implementar fluxo assíncrono do SITFIS: solicitação, protocolo, espera, obtenção e PDF Base64.
-- [ ] Implementar extração de texto com PyMuPDF ou pypdf e OCR somente quando necessário.
-- [ ] Normalizar pendências e obrigações em JSON com testes de regressão do parser.
-- [ ] Implementar autorização/procuração e bloqueio sem vínculo válido.
-- [ ] Criar fila assíncrona e observabilidade do processamento.
-
-**Critérios de aceite:** relatório autorizado é processado de ponta a ponta; pendências são rastreáveis à fonte; falha de parser não produz “sem pendências”; documentos e dados sensíveis seguem retenção e acesso compatíveis com LGPD.
+- [ ] Integra Contador quando contrato, certificado e autorização estiverem disponíveis.
+- [ ] Fluxo assíncrono do SITFIS, protocolo, obtenção e processamento do documento.
+- [ ] Extração de texto e OCR somente quando necessário.
+- [ ] Normalização de pendências e obrigações com regressão do parser.
+- [ ] Autorização/procuração e bloqueio sem vínculo válido.
+- [ ] Fila e observabilidade do processamento.
 
 ## Fase 4 — Regulariza.br e expansão modular
 
-**Status:** futuro.
+**Estado:** futuro.
 
-- [ ] Adicionar observabilidade, alertas, backup, SLA e dashboard operacional.
-- [ ] Adicionar relatórios e histórico de consultas conforme base legal e necessidade do produto.
-- [ ] Adicionar histórico Simples/MEI quando uma fonte autorizada o disponibilizar.
-- [ ] Adicionar módulos trabalhista e previdenciário.
-- [ ] Adicionar conectores estaduais, municipais e novas fontes oficiais/autorizadas.
+- [ ] Observabilidade, alertas, backup, SLA e novos painéis.
+- [ ] Histórico ampliado conforme base legal e necessidade de produto.
+- [ ] Histórico de Simples/MEI quando fonte autorizada o disponibilizar.
+- [ ] Módulos trabalhista, previdenciário, estadual e municipal.
 
-**Critérios de aceite:** novos módulos reutilizam contratos e padrões do Fiscal Gateway, isolam seus fornecedores, possuem spec própria e não alteram o comportamento do MVP sem migração documentada.
+## Critérios de avanço entre estados
+
+| De | Para | Critério mínimo |
+|---|---|---|
+| `DRAFT` | `EM_REVISÃO` | Objetivo, escopo, dependências, riscos e aceite escritos. |
+| `EM_REVISÃO` | `APROVADA` | Revisão concluída e aprovação explícita registrada. |
+| `APROVADA` | `EM_IMPLEMENTAÇÃO` | DoR atendido e tarefa iniciada na branch adequada. |
+| `EM_IMPLEMENTAÇÃO` | `EM_HOMOLOGAÇÃO` | Implementação/testes locais concluídos, sem secrets e com evidência de diff/commit. |
+| `EM_HOMOLOGAÇÃO` | `CONCLUÍDA` | Homologação aplicável concluída, aceite validado e documentos atualizados. |
+| Qualquer estado executável | `CANCELADA` | Motivo, responsável e impacto registrados sem apagar histórico. |
 
 ## Dependências externas e riscos
 
-| Dependência/risco | Impacto | Mitigação | Status |
+| Dependência/risco | Impacto | Mitigação | Estado |
 |---|---:|---|---|
-| Acesso ao SERPRO | Alto | Trial, contrato do cliente e fonte alternativa no MVP | Não validado |
-| Procuração/autorização fiscal | Alto | Bloquear consulta sem vínculo válido | Não validado |
-| Mudança de API | Médio | Conectores isolados e versionados | Monitorar |
-| Alucinação do LLM | Alto | Contrato determinístico e separação de camadas | Mitigado por arquitetura |
-| Vazamento de dados | Alto | Secrets server-side, TLS, logs mínimos e LGPD | Obrigatório |
-| Limite da ReceitaWS | Médio | Plano comercial, cache ou SERPRO | Não validado |
-| CNPJ alfanumérico | Alto | String desde o primeiro modelo | Requisito fechado |
-| Mudança do SITFIS/PDF | Médio | Parser desacoplado e testes de regressão | Futuro |
+| Meta/WhatsApp | Alto | Validar conta, webhook, assinatura e número em ambiente autorizado | Pendente externo |
+| Dify/LLM | Alto | Enviar somente contrato canônico e testar explicações com evidência | Pendente externo |
+| SERPRO | Alto | Contrato, e-CNPJ, conector isolado e fonte alternativa controlada | Pendente externo |
+| PGFN/procurações | Alto | Bloquear sem vínculo válido e preservar indisponibilidade | Pendente externo |
+| OIDC do cliente | Alto | Testar issuer, PKCE, grupos, sessão e RBAC | Pendente externo |
+| Docker/infraestrutura | Alto | Executar Compose em ambiente autorizado e registrar smoke test | Bloqueado no ambiente atual |
+| Limites da ReceitaWS | Médio | Contrato, cache e provider oficial quando contratado | Pendente externo |
+| Alucinação do LLM | Alto | Camadas separadas e diagnóstico determinístico | Mitigado por arquitetura |
+| Vazamento de dados | Alto | Secrets server-side, TLS, redaction, RBAC e LGPD | Controle obrigatório |
+| CNPJ alfanumérico | Alto | String desde o modelo e testes de regressão | Coberto tecnicamente |
 
-## Registro de marcos
+## Registro de marcos e evidências
 
-| Data | Marco | Evidência | Observação |
+| Data | Marco | Evidência | Estado |
 |---|---|---|---|
-| 20/08/2026 | Governança documental e SDD | Arquivos de governança versionados | Bootstrap inicial do projeto |
-| 20/08/2026 | Preparação pré-credenciais | Specs, testes mockados, scripts e guia operacional | Compose aguarda Docker Desktop |
+| 20/08/2026 | Base SDD e governança inicial | `PRD.md`, `AGENTS.md`, `ROADMAP.md`, `MEMORY.md` e specs | Histórico preservado |
+| 20/08/2026 | Painel operacional implementado | Commits da branch atual e testes do painel | Homologação externa pendente |
+| 21/08/2026 | Spec-mãe e histórico consolidados | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` e índice | `DRAFT`/histórico em `EM_HOMOLOGAÇÃO` |
+| 21/08/2026 | Validação técnica de baseline | 66 testes, 1 integração pulada, Ruff, MyPy, Alembic e scanner | A repetir após documentação |
+
+## Regra de manutenção
+
+- Atualizar este roadmap ao criar, iniciar, concluir, bloquear ou cancelar uma tarefa.
+- Cada tarefa deve apontar para arquivo, critério de aceite, evidência e commit individual.
+- Atualizar `MEMORY.md` junto com decisões, riscos, dependências, validações e homologações relevantes.
+- Separar sempre implementação técnica concluída, homologação externa pendente e produção bloqueada.
+- Não marcar integração ou provider como disponível sem fonte, vigência, versão, responsável e evidência autorizada.
