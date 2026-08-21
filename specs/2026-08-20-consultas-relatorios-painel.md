@@ -1,6 +1,14 @@
 # Spec — Consultas, histórico e relatórios do painel
 
-**Status:** implementada tecnicamente em 20/08/2026; validação integrada depende do ambiente local e da Fase 0.
+**Status:** `EM_HOMOLOGAÇÃO`
+**Data do registro:** 21/08/2026
+**Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)
+
+> **Registro histórico:** esta spec preserva o escopo original de consulta manual, histórico e relatórios. O painel, as exportações e o isolamento por organização estão implementados; a validação integrada depende de ambiente local e das dependências da Fase 0.
+
+**Evidências existentes:** rotas em `src/inaptas/interfaces/panel/routes.py`, templates do painel e testes de consultas, relatórios e segurança.
+
+**Pendências externas:** Docker/PostgreSQL/Redis, providers habilitados, OIDC real e POC com CNPJ autorizado.
 
 ## Objetivo
 

@@ -1,9 +1,12 @@
 # Spec: Arquitetura da Fase 1 — MVP Inaptas
 
-**Status:** concluída tecnicamente; POC externa pendente
+**Status:** `EM_HOMOLOGAÇÃO`
 **Data:** 20/08/2026
 **Relaciona-se a:** `PRD.md` seções 4–12; `ROADMAP.md` Fase 1
 **Fonte de domínio:** `escopo_tecnico_inaptas_regularizabr_atualizado.md`
+**Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)
+
+> **Registro histórico:** esta spec preserva o escopo original da arquitetura da Fase 1. A implementação técnica está evidenciada pelos testes automatizados e pelos módulos do Fiscal Gateway; a POC externa, os contratos e as credenciais dos providers permanecem pendentes.
 
 ## 1. Objetivo
 

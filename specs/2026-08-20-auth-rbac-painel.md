@@ -1,6 +1,14 @@
 # Spec — Autenticação e RBAC do painel
 
-**Status:** implementada tecnicamente em 20/08/2026; ativação OIDC real pendente das credenciais do cliente.
+**Status:** `EM_HOMOLOGAÇÃO`
+**Data do registro:** 21/08/2026
+**Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)
+
+> **Registro histórico:** esta spec preserva o escopo original de autenticação e RBAC do painel. O fluxo server-side, proteção CSRF, papéis e regras administrativas estão implementados e testados; a ativação OIDC real depende das credenciais e do mapeamento do cliente.
+
+**Evidências existentes:** `src/inaptas/interfaces/panel`, `tests/panel/test_auth.py`, `tests/panel/test_security.py` e templates sem tokens expostos.
+
+**Pendências externas:** issuer OIDC, client, callback, grupos/papéis e ambiente Redis do cliente.
 
 ## Objetivo
 

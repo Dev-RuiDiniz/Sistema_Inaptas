@@ -1,6 +1,14 @@
 # Spec — Ambiente e integração local pré-credenciais
 
-**Status:** implementada tecnicamente; execução do Compose pendente por ausência do Docker.
+**Status:** `EM_HOMOLOGAÇÃO`
+**Data do registro:** 21/08/2026
+**Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)
+
+> **Registro histórico:** o escopo original desta spec é a execução local pré-credenciais com Docker Compose. Os arquivos de configuração, migrations e testes permanecem no repositório; a execução do Compose e o smoke test integrado aguardam Docker disponível.
+
+**Evidências existentes:** `docker-compose.yml`, `alembic`, `scripts` e suíte automatizada; 66 testes aprovados e uma integração pulada por ausência do Docker.
+
+**Pendências externas:** Docker/infraestrutura local, contratos de providers e configuração de ambiente autorizada.
 
 ## Objetivo
 

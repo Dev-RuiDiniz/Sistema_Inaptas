@@ -1,6 +1,14 @@
 # Spec — Dashboard operacional do painel
 
-**Status:** implementada tecnicamente em 20/08/2026; fontes reais e OIDC permanecem pendentes.
+**Status:** `EM_HOMOLOGAÇÃO`
+**Data do registro:** 21/08/2026
+**Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)
+
+> **Registro histórico:** esta spec preserva o escopo original do dashboard operacional. A visão de consultas, fontes e indisponibilidades está implementada; fontes reais, OIDC e dados de produção permanecem pendentes de homologação.
+
+**Evidências existentes:** `src/inaptas/interfaces/panel`, templates do dashboard e testes do painel.
+
+**Pendências externas:** OIDC do cliente, providers contratados, ambiente de persistência e CNPJ real autorizado.
 
 ## Objetivo
 

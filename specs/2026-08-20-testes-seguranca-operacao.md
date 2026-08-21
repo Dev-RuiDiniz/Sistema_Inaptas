@@ -1,6 +1,14 @@
 # Spec — Testes, segurança e operação pré-credenciais
 
-**Status:** implementada tecnicamente; homologação real externa pendente.
+**Status:** `EM_HOMOLOGAÇÃO`
+**Data do registro:** 21/08/2026
+**Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)
+
+> **Registro histórico:** esta spec preserva o escopo original de testes, segurança e operação pré-credenciais. A validação local está evidenciada por 66 testes aprovados, Ruff, MyPy, Alembic e scanner de segurança; a homologação de serviços reais permanece externa.
+
+**Evidências existentes:** `tests/`, `scripts/verificar-seguranca.ps1`, configurações redigidas e validações automatizadas.
+
+**Pendências externas:** Meta/WhatsApp, Dify, SERPRO, PGFN, OIDC, Docker e CNPJ real autorizado para POC.
 
 ## Objetivo
 
