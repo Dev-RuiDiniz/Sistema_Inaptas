@@ -57,8 +57,9 @@ logs redigidos e operação local reproduzível.
 
 - Cada tarefa possui commit independente em branch de funcionalidade.
 - Se uma verificação final falhar, a branch não será publicada.
-- O push final será somente para
-  `origin/funcionalidade/validacao-pre-credenciais`.
+- A publicação descrita neste plano histórico refere-se à branch de
+  pré-credenciais; a consolidação documental atual preserva esse histórico e
+  será publicada em `origin/main` sem squash.
 
 ## Resultado da implementação
 

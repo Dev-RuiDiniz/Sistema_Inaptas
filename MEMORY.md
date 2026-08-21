@@ -9,7 +9,7 @@
 - **Direção futura:** Regulariza.br modular.
 - **Fase:** implementação técnica do MVP público e painel concluída; homologação externa e produção aguardam dependências.
 - **Branch atual:** `funcionalidade/frontend-painel-escritorio`.
-- **Estado da branch na descoberta:** 9 commits além de `main`; após os quatro commits documentais iniciais desta consolidação, 13 commits além de `main`.
+- **Estado da branch na descoberta:** 9 commits além de `main`; após os seis commits documentais de plano, specs, governança, acompanhamento e README, 15 commits além de `main`.
 - **Remoto de publicação:** `origin`, com destino final `origin/main`.
 - **Fonte macro:** `PRD.md`.
 - **Fonte operacional consolidada:** `specs/2026-08-21-mvp-inaptas-especificacao-mae.md`, inicialmente em `DRAFT`.
@@ -99,12 +99,11 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 
 ## Próximos passos
 
-1. Concluir a consolidação documental e executar as validações técnicas e documentais.
-2. Integrar a branch atual na `main` preservando commits e publicar somente em `origin/main`.
-3. Disponibilizar Docker para executar Compose e o teste de integração.
-4. Completar Fase 0 com responsáveis, titularidade, contratos, credenciais fora do Git e CNPJ autorizado.
-5. Homologar Meta/WhatsApp, Dify, ReceitaWS, OIDC, SERPRO e PGFN conforme escopo e autorizações.
-6. Atualizar os estados para `CONCLUÍDA` somente após evidência externa e DoD completo.
+1. Integrar a branch atual na `main` preservando commits e publicar somente em `origin/main`.
+2. Disponibilizar Docker para executar Compose e o teste de integração.
+3. Completar Fase 0 com responsáveis, titularidade, contratos, credenciais fora do Git e CNPJ autorizado.
+4. Homologar Meta/WhatsApp, Dify, ReceitaWS, OIDC, SERPRO e PGFN conforme escopo e autorizações.
+5. Atualizar os estados para `CONCLUÍDA` somente após evidência externa e DoD completo.
 
 ## Histórico cronológico append-only
 
@@ -127,6 +126,13 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 - Índice e seis specs históricas atualizados, preservando escopo e evidências e promovendo seu estado para `EM_HOMOLOGAÇÃO`.
 - `AGENTS.md` atualizado com fonte consolidada, estados, DoR/DoD, commits por tarefa e publicação sem squash.
 - `ROADMAP.md` e esta memória atualizados para refletir 66 testes, o painel como MVP operacional, bloqueios externos e os próximos passos.
+
+### 21/08/2026 — validação documental e técnica
+
+- pytest, Ruff, MyPy, Alembic, scanner de segurança e `git diff --check` foram executados novamente com aprovação.
+- Todos os 23 Markdown foram lidos como UTF-8; links relativos existentes, statuses canônicos, IDs de tarefas únicos e matriz RF/RNF completa foram verificados.
+- O diff da consolidação contém somente documentação e planos; nenhum código, endpoint, secret, certificado, CNPJ real ou dado fiscal foi adicionado.
+- A integração em `main` e o push para `origin/main` permanecem como próximo passo de publicação.
 
 ## Regra de manutenção
 

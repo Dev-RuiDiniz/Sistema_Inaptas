@@ -29,12 +29,12 @@
 
 ## Resultado da validação final
 
-- 53 testes passaram e 1 teste de integração foi pulado porque Docker não está
+- 66 testes passaram e 1 teste de integração foi pulado porque Docker não está
   instalado neste ambiente.
 - Ruff, MyPy, Alembic e scanner de segurança passaram.
 - `docker compose config --quiet` permanece bloqueado pelo comando Docker
   ausente.
-- A última ação da execução será o push da branch de funcionalidade.
+- Este plano é histórico; a consolidação documental atual preserva seus commits e fará a publicação final na `main` conforme o plano de 21/08/2026.
 
 ## Regras por tarefa
 

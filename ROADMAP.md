@@ -70,12 +70,12 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 
 | ID | Tarefa | Arquivo/entrega | Estado | Commit correspondente |
 |---|---|---|---|---|
-| `TASK-MVP-001` | Criar spec-mãe | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` | `[x]` concluída | `docs(specs): consolidar especificação mestre do mvp` |
-| `TASK-MVP-002` | Organizar índice e specs históricas | `specs/README.md` e seis specs datadas | `[x]` concluída | `docs(specs): organizar índice e histórico de especificações` |
-| `TASK-MVP-003` | Atualizar governança | `AGENTS.md` | `[x]` concluída | `docs(governanca): alinhar regras de execução e publicação` |
-| `TASK-MVP-004` | Atualizar roadmap e memória | `ROADMAP.md` e `MEMORY.md` | `[-]` em andamento | `docs(roadmap): registrar escopo e estado do mvp` |
-| `TASK-MVP-005` | Atualizar visão comercial | `README.md` | `[ ]` pendente | `docs(readme): apresentar visão comercial do mvp` |
-| `TASK-MVP-006` | Validar documentação e publicar | evidências, validações e `origin/main` | `[ ]` pendente | `docs: registrar validação documental do mvp` |
+| `TASK-MVP-001` | Criar spec-mãe | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` | `[x]` concluída | `0e27da7` (plano) e `b104cde` (spec) |
+| `TASK-MVP-002` | Organizar índice e specs históricas | `specs/README.md` e seis specs datadas | `[x]` concluída | `8bf6833` |
+| `TASK-MVP-003` | Atualizar governança | `AGENTS.md` | `[x]` concluída | `35d9509` |
+| `TASK-MVP-004` | Atualizar roadmap e memória | `ROADMAP.md` e `MEMORY.md` | `[x]` concluída | `d63fed7` |
+| `TASK-MVP-005` | Atualizar visão comercial | `README.md` | `[x]` concluída | `f7d8dc0` |
+| `TASK-MVP-006` | Validar documentação e publicar | evidências, validações e `origin/main` | `[x]` validação concluída; publicação na etapa de integração | `docs: registrar validação documental do mvp` |
 
 ## Marco 0 — Governança e base SDD
 
@@ -208,6 +208,21 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | 20/08/2026 | Painel operacional implementado | Commits da branch atual e testes do painel | Homologação externa pendente |
 | 21/08/2026 | Spec-mãe e histórico consolidados | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` e índice | `DRAFT`/histórico em `EM_HOMOLOGAÇÃO` |
 | 21/08/2026 | Validação técnica de baseline | 66 testes, 1 integração pulada, Ruff, MyPy, Alembic e scanner | A repetir após documentação |
+
+## Validação documental e técnica final
+
+**Data:** 21/08/2026
+**Estado:** `EM_HOMOLOGAÇÃO` até a publicação em `origin/main`.
+
+- [x] `python -m pytest -q` — 66 aprovados, 1 integração pulada por ausência do Docker.
+- [x] `python -m ruff check src tests` — aprovado.
+- [x] `python -m mypy src` — aprovado em 43 arquivos.
+- [x] `python -m alembic heads` — `0003_resultados_painel`.
+- [x] `powershell -File scripts/verificar-seguranca.ps1` — nenhum padrão de credencial.
+- [x] `git diff --check` — aprovado.
+- [x] Markdown em UTF-8, links relativos existentes, statuses canônicos, IDs `TASK-MVP` únicos e matriz RF/RNF completa.
+- [x] Revisão do diff — somente documentação e planos; nenhum código, endpoint ou comportamento de produção alterado.
+- [ ] `git fetch origin`, integração sem squash, validação final em `main` e push para `origin/main`.
 
 ## Regra de manutenção
 

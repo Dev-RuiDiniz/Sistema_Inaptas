@@ -57,5 +57,6 @@ chamadas externas durante os testes automatizados.
 - `scripts/validar-local.ps1` valida Docker, health, autenticação e CNPJ inválido.
 - Testes de integração ficam disponíveis com o marcador `integracao`.
 - Neste ambiente, o script parou corretamente porque Docker não está instalado.
-- Validação final: 53 testes passaram; 1 teste de integração foi pulado por
-  ausência da API local; Ruff, MyPy, Alembic e scanner de segurança passaram.
+- Validação final registrada na consolidação: 66 testes passaram; 1 teste de
+  integração foi pulado por ausência do Docker; Ruff, MyPy, Alembic e scanner de
+  segurança passaram.

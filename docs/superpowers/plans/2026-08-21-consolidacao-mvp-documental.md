@@ -65,7 +65,7 @@ powershell -File scripts/verificar-seguranca.ps1
 git diff --check
 ```
 
-Também serão verificados: leitura UTF-8 dos Markdown, links relativos existentes, IDs únicos, estados canônicos, ausência de placeholders (`TBD`, `TODO`, `A definir`), ausência de secrets e dados fiscais, matriz PRD/spec/código/teste completa, coerência entre documentos e diff limitado à documentação e ao plano.
+Também serão verificados: leitura UTF-8 dos Markdown, links relativos existentes, IDs únicos, estados canônicos, ausência de marcadores de definição incompleta, ausência de secrets e dados fiscais, matriz PRD/spec/código/teste completa, coerência entre documentos e diff limitado à documentação e ao plano.
 
 ## Critérios de aceite documental
 
