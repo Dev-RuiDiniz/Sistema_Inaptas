@@ -41,6 +41,17 @@ async def exigir_token_interno(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autorizado")
 
 
+async def exigir_token_orquestrador(
+    request: Request,
+    authorization: Annotated[str | None, Header()] = None,
+) -> None:
+    settings: Settings = request.app.state.settings
+    esperado = settings.orchestrator_api_token
+    recebido = authorization.removeprefix("Bearer ").strip() if authorization else ""
+    if not esperado or not secrets.compare_digest(recebido, esperado):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autorizado")
+
+
 async def exigir_rate_limit(
     request: Request,
     authorization: Annotated[str | None, Header()] = None,

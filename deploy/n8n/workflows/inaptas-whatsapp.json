@@ -1,0 +1,141 @@
+{
+  "name": "Inaptas — WhatsApp e consulta fiscal",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inaptas",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "webhook-whatsapp",
+      "name": "Webhook interno validado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-before-activation",
+          "name": "Inaptas Webhook Interno"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst mensagem = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];\nconst texto = mensagem?.text?.body ?? '';\nconst cnpj = texto.replace(/\\D/g, '');\nreturn [{ json: { event_id: mensagem?.id ?? 'evento-sem-id', destinatario: mensagem?.from ?? '', cnpj, payload } }];"
+      },
+      "id": "extrair-evento",
+      "name": "Extrair evento e CNPJ",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://app:8000/v1/orchestrator/company/full-check",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"cnpj\": \"{{$json.cnpj}}\"}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "consulta-gateway",
+      "name": "Consultar Fiscal Gateway",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "configure-before-activation",
+          "name": "Inaptas Gateway Orquestrador"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"model\": \"{{$env.OLLAMA_MODEL || 'qwen3:8b'}}\", \"stream\": false, \"prompt\": \"Explique somente este contrato canônico. Não invente situação fiscal, dívida, regime ou regularidade. Se uma fonte estiver UNKNOWN, unavailable ou disabled, informe que não foi possível confirmar.\n{{$json | jsonStringify}}\"}",
+        "options": {
+          "timeout": 30000
+        },
+        "continueOnFail": true
+      },
+      "id": "interpretacao-ollama",
+      "name": "Interpretação opcional Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const diagnostico = $('Consultar Fiscal Gateway').item.json.system_diagnosis ?? {};\nconst fallback = `A situação cadastral ${diagnostico.registration === 'ACTIVE' ? 'retornou ativa' : 'não pôde ser confirmada'}. A situação na PGFN ${diagnostico.pgfn === 'NO_ACTIVE_DEBT_RETURNED_BY_SOURCE' ? 'não retornou dívida ativa na consulta' : 'não pôde ser confirmada'}. A interpretação automática está indisponível; consulte as evidências e os status das fontes.`;\nconst resposta = $json.response;\nconst permiteRegularidade = diagnostico.registration === 'ACTIVE' && diagnostico.pgfn === 'NO_ACTIVE_DEBT_RETURNED_BY_SOURCE';\nconst proibida = typeof resposta === 'string' && /regular|sem pendência|sem dívida|sem irregularidade/i.test(resposta) && !permiteRegularidade;\nreturn [{ json: { ...$('Consultar Fiscal Gateway').item.json, ai_interpretation: typeof resposta === 'string' && resposta.trim() && !proibida ? resposta.trim() : fallback } }];"
+      },
+      "id": "fallback-seguro",
+      "name": "Fallback determinístico seguro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://graph.facebook.com/' + $env.WHATSAPP_PHONE_NUMBER_ID + '/messages'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.WHATSAPP_ACCESS_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"messaging_product\":\"whatsapp\",\"to\":\"{{$('Extrair evento e CNPJ').item.json.destinatario}}\",\"type\":\"text\",\"text\":{\"body\":\"{{$json.ai_interpretation}}\"}}"
+      },
+      "id": "responder-whatsapp",
+      "name": "Responder no WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 0]
+    }
+  ],
+  "connections": {
+    "Webhook interno validado": {
+      "main": [[{"node": "Extrair evento e CNPJ", "type": "main", "index": 0}]]
+    },
+    "Extrair evento e CNPJ": {
+      "main": [[{"node": "Consultar Fiscal Gateway", "type": "main", "index": 0}]]
+    },
+    "Consultar Fiscal Gateway": {
+      "main": [[{"node": "Interpretação opcional Ollama", "type": "main", "index": 0}]]
+    },
+    "Interpretação opcional Ollama": {
+      "main": [[{"node": "Fallback determinístico seguro", "type": "main", "index": 0}]]
+    },
+    "Fallback determinístico seguro": {
+      "main": [[{"node": "Responder no WhatsApp", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all"
+  },
+  "versionId": "inaptas-vps-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

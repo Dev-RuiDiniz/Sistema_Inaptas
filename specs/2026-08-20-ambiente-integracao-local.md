@@ -1,5 +1,8 @@
 # Spec — Ambiente e integração local pré-credenciais
 
+> Documento histórico de 21/08/2026. As referências de orquestração deste
+> documento foram superadas; a referência vigente é a migração para n8n/Ollama.
+
 **Status:** `EM_HOMOLOGAÇÃO`
 **Data do registro:** 21/08/2026
 **Referência operacional:** [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md)

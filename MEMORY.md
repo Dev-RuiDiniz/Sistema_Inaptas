@@ -18,7 +18,7 @@
 ## Resumo do estado técnico
 
 - Fiscal Gateway FastAPI, contrato canônico, normalização de CNPJ numérico/alfanumérico e diagnóstico determinístico implementados.
-- Fluxos de WhatsApp/Dify, providers cadastrais/fiscais e painel operacional preparados sem credenciais reais.
+- Fluxos de WhatsApp/n8n, providers cadastrais/fiscais e painel operacional preparados sem credenciais reais.
 - Painel faz parte do MVP operacional: OIDC, sessão server-side/Redis, RBAC, consultas manuais, histórico, relatórios PDF/CSV, dashboard, usuários, retenção e auditoria.
 - PostgreSQL, Redis, migrations, Compose, healthcheck, cache, rate limit, idempotência, logs redigidos e segurança estão preparados.
 - Validação técnica registrada nesta consolidação: **66 testes aprovados**, **1 teste de integração pulado por ausência do Docker**, Ruff aprovado, MyPy aprovado, Alembic aprovado e scanner de segurança aprovado.
@@ -30,7 +30,7 @@
 2. `PRD.md` mantém a visão macro; a spec-mãe é a referência operacional do MVP público e do painel.
 3. Specs históricas são preservadas e devem apontar para a spec-mãe; não substituem o documento vigente.
 4. O painel interno faz parte do MVP operacional, embora tenha sido implementado como incremento posterior.
-5. O núcleo é um Fiscal Gateway próprio, separado do Dify e de cada provider.
+5. O núcleo é um Fiscal Gateway próprio, separado do n8n, do Ollama e de cada provider.
 6. CNPJ é tratado como `string` e aceita formato numérico e alfanumérico.
 7. A resposta separa `source_data`, `system_diagnosis` e `ai_interpretation`.
 8. A IA não pode inferir situação fiscal, dívida, regime, pendência ou ausência de problema sem evidência válida.
@@ -38,7 +38,7 @@
 10. ReceitaWS é o provider cadastral inicial; SERPRO e PGFN dependem de contrato, credenciais e autorizações.
 11. PostgreSQL atende persistência/auditoria e Redis atende sessão, cache, rate limit e idempotência, conforme o ambiente.
 12. A retenção inicial documentada é de 90 dias, sujeita à política válida do contratante e às obrigações aplicáveis.
-13. O desenvolvimento do MVP custa R$ 2.500,00; APIs, certificados, infraestrutura, Meta, Dify, LLM e demais terceiros ficam sob responsabilidade do contratante.
+13. O desenvolvimento do MVP custa R$ 2.500,00; APIs, certificados, infraestrutura, Meta, n8n, Ollama/LLM e demais terceiros ficam sob responsabilidade do contratante.
 14. A consolidação não altera código, endpoints nem comportamento de produção.
 15. Cada tarefa documental possui commit próprio em português; a integração final preservará os commits sem squash e publicará em `origin/main`.
 
@@ -49,7 +49,7 @@ WhatsApp Business Cloud API
         ↓ webhook validado e idempotente
 Fiscal Gateway em FastAPI
         ↓
-Dify para conversa e explicação baseada em evidências
+n8n self-hosted para workflow e Ollama local para explicação opcional baseada em evidências
         ↓
 Conectores independentes: cadastro, SERPRO, PGFN e extensões futuras
         ↓
@@ -58,7 +58,7 @@ Normalização → diagnóstico determinístico → interpretação da IA
 PostgreSQL: consultas e auditoria | Redis: sessão, cache, rate limit e idempotência
 ```
 
-O Dify não recebe diretamente credenciais fiscais. O backend controla autenticação, timeout, retry, cache, rate limit, auditoria, normalização e mensagens seguras de indisponibilidade.
+n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla autenticação, timeout, retry, cache, rate limit, auditoria, normalização e mensagens seguras de indisponibilidade.
 
 ## Implementação registrada
 
@@ -69,7 +69,7 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 - `src/inaptas/infrastructure/providers`: ReceitaWS e providers fiscais condicionais.
 - `src/inaptas/infrastructure/persistence`: SQLAlchemy, repositórios e Alembic.
 - `src/inaptas/infrastructure/cache`: Redis, cache, rate limit, sessão e idempotência.
-- `src/inaptas/infrastructure/integrations`: Dify, WhatsApp e webhook Meta.
+- `src/inaptas/infrastructure/integrations`: n8n, Ollama, WhatsApp e webhook Meta.
 - `tests/`: 66 testes aprovados; a integração com Compose é opcional e há 1 teste pulado quando Docker não está disponível.
 - `scripts/validar-local.ps1`: inicia Compose e executa smoke tests locais sem imprimir secrets.
 - `scripts/verificar-seguranca.ps1`: verifica padrões de credenciais somente em arquivos versionados.
@@ -79,7 +79,8 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 | Serviço ou decisão | Uso | Estado |
 |---|---|---|
 | Meta Business/WhatsApp Cloud API | Recepção e envio de mensagens | Conta, número, permissões e webhook pendentes |
-| Dify | Orquestração conversacional e interpretação | Projeto, prompt e chave do contratante pendentes |
+| n8n self-hosted | Workflow conversacional e integração | VPS, credenciais do webhook e workflow pendentes de homologação |
+| Ollama local | Interpretação opcional | Modelo `qwen3:8b`, volume e capacidade da VPS pendentes de homologação |
 | ReceitaWS | Fonte cadastral inicial | Contratação, limites e POC pendentes |
 | SERPRO Consulta CNPJ | Fonte oficial preferencial | Contrato, e-CNPJ e credenciais pendentes |
 | SERPRO/PGFN | Dívida Ativa da União | Contrato, autorização e credenciais pendentes |
@@ -102,7 +103,7 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 1. Integrar a branch atual na `main` preservando commits e publicar somente em `origin/main`.
 2. Disponibilizar Docker para executar Compose e o teste de integração.
 3. Completar Fase 0 com responsáveis, titularidade, contratos, credenciais fora do Git e CNPJ autorizado.
-4. Homologar Meta/WhatsApp, Dify, ReceitaWS, OIDC, SERPRO e PGFN conforme escopo e autorizações.
+4. Homologar Meta/WhatsApp, n8n, Ollama, ReceitaWS, OIDC, SERPRO e PGFN conforme escopo e autorizações.
 5. Atualizar os estados para `CONCLUÍDA` somente após evidência externa e DoD completo.
 
 ## Histórico cronológico append-only
@@ -142,6 +143,17 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 - O teste foi observado em RED com a CSP antiga e em GREEN após a correção; a imagem Docker foi reconstruída e o novo header foi verificado no endpoint real.
 - Playwright confirmou o título, as rotas e os schemas visíveis no Swagger, sem erro de console.
 - A homologação visual permanece pendente; não foram adicionados secrets, credenciais ou dados fiscais.
+
+### 22/08/2026 — migração de orquestração para n8n/Ollama
+
+- O plano aprovado substituiu a orquestração anterior por n8n self-hosted em VPS, mantendo o Fiscal Gateway e o painel FastAPI/Jinja2 como núcleo e interface do cliente.
+- Foi criada a spec `specs/2026-08-22-migracao-n8n-vps.md` em `EM_IMPLEMENTAÇÃO`, com contratos, rollout, reversão, riscos, DoR e DoD.
+- O runtime removeu a integração anterior, adicionou `N8nClient` com Bearer separado, correlation ID, retry limitado e retorno seguro de indisponibilidade.
+- O endpoint `/v1/orchestrator/company/full-check` usa `ORCHESTRATOR_API_TOKEN`; o cliente `OllamaClient` usa `qwen3:8b` por padrão, valida afirmações de regularidade e aplica fallback determinístico.
+- O Compose recebeu n8n, PostgreSQL próprio, Ollama e Caddy; o workflow exportável exige autenticação e não foi ativado automaticamente.
+- A suíte local passou com 73 testes e 1 integração pulada; Ruff, MyPy, Alembic, scanner, `git diff --check` e `docker compose config --quiet` passaram.
+- Gateway, PostgreSQL e Redis locais estão saudáveis. O pull das imagens n8n/Ollama excedeu o limite do registry local; a homologação completa da infraestrutura permanece pendente.
+- Nenhum secret, certificado, CNPJ real ou dado fiscal foi adicionado. Documentos anteriores que citam a arquitetura legada foram marcados como históricos/superados.
 
 ## Regra de manutenção
 

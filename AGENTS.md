@@ -92,7 +92,7 @@ Qualquer alteração relevante em requisitos, decisão, risco, status, teste, de
 
 ## 7. Regras de domínio e arquitetura
 
-- O núcleo é um Fiscal Gateway próprio, desacoplado do Dify e dos fornecedores externos.
+- O núcleo é um Fiscal Gateway próprio, desacoplado do n8n, do Ollama e dos fornecedores externos.
 - Cada provider deve ser um conector substituível, com timeout, retry controlado, autenticação, rate limit e indisponibilidade rastreáveis.
 - O fluxo de confiança é sempre `source_data` → `system_diagnosis` → `ai_interpretation`.
 - A IA pode conduzir a conversa e explicar evidências, mas nunca inventar situação cadastral, dívida, regime, pendência ou ausência de problema.
@@ -100,7 +100,7 @@ Qualquer alteração relevante em requisitos, decisão, risco, status, teste, de
 - CNPJ é sempre string e deve aceitar formato numérico e alfanumérico.
 - Scraping agressivo, bypass de CAPTCHA e login automatizado no e-CAC não fazem parte da arquitetura aprovada.
 - O painel operacional faz parte do MVP, com OIDC, sessão server-side, RBAC, consultas, relatórios e auditoria conforme a spec-mãe.
-- Credenciais fiscais ficam somente no servidor; o Dify não recebe secrets de providers.
+- Credenciais fiscais ficam somente no Gateway ou em serviços internos autorizados; n8n e Ollama recebem apenas o contrato canônico mínimo, nunca secrets de providers.
 
 ## 8. Testes, segurança, LGPD e auditoria
 

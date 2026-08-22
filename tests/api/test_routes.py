@@ -35,6 +35,7 @@ def _cliente() -> TestClient:
     configuracao = Settings(
         app_env="test",
         internal_api_token="token-teste",
+        orchestrator_api_token="token-orquestrador",
         trusted_hosts=["testserver"],
         rate_limit_enabled=False,
     )
@@ -69,6 +70,24 @@ def test_rota_interna_rejeita_token_invalido() -> None:
 
     assert resposta.status_code == 401
     assert resposta.json()["error"]["code"] == "unauthorized"
+
+
+def test_rota_do_orquestrador_usa_token_separado() -> None:
+    cliente = _cliente()
+
+    com_token_interno = cliente.post(
+        "/v1/orchestrator/company/full-check",
+        headers={"Authorization": "Bearer token-teste"},
+        json={"cnpj": "11222333000181"},
+    )
+    com_token_orquestrador = cliente.post(
+        "/v1/orchestrator/company/full-check",
+        headers={"Authorization": "Bearer token-orquestrador"},
+        json={"cnpj": "11222333000181"},
+    )
+
+    assert com_token_interno.status_code == 401
+    assert com_token_orquestrador.status_code == 200
 
 
 def test_lookup_autenticado_devolve_resposta_canonica() -> None:

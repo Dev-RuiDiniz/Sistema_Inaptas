@@ -26,6 +26,10 @@ def test_producao_rejeita_openapi_habilitado() -> None:
     settings = Settings(
         app_env="production",
         internal_api_token="token-producao-seguro",
+        orchestrator_api_token="token-orquestrador-seguro",
+        n8n_internal_webhook_url="https://n8n.exemplo/webhook/inaptas",
+        n8n_internal_webhook_token="token-n8n-seguro",
+        n8n_encryption_key="chave-n8n-segura",
         trusted_hosts=["api.exemplo.com"],
     )
 
@@ -37,6 +41,10 @@ def test_producao_rejeita_trusted_host_wildcard() -> None:
     settings = Settings(
         app_env="production",
         internal_api_token="token-producao-seguro",
+        orchestrator_api_token="token-orquestrador-seguro",
+        n8n_internal_webhook_url="https://n8n.exemplo/webhook/inaptas",
+        n8n_internal_webhook_token="token-n8n-seguro",
+        n8n_encryption_key="chave-n8n-segura",
         openapi_enabled=False,
         trusted_hosts=["*"],
     )
@@ -49,6 +57,10 @@ def test_producao_segura_e_aceita() -> None:
     settings = Settings(
         app_env="production",
         internal_api_token="token-producao-seguro",
+        orchestrator_api_token="token-orquestrador-seguro",
+        n8n_internal_webhook_url="https://n8n.exemplo/webhook/inaptas",
+        n8n_internal_webhook_token="token-n8n-seguro",
+        n8n_encryption_key="chave-n8n-segura",
         openapi_enabled=False,
         trusted_hosts=["api.exemplo.com"],
     )

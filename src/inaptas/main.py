@@ -17,7 +17,7 @@ from inaptas.config import Settings, get_settings, validar_configuracao
 from inaptas.domain.cnpj import CnpjInvalidoError
 from inaptas.infrastructure.cache.redis_store import RedisStore
 from inaptas.infrastructure.health import HealthState
-from inaptas.infrastructure.integrations.dify import DifyClient
+from inaptas.infrastructure.integrations.n8n import N8nClient
 from inaptas.infrastructure.integrations.whatsapp import WhatsAppClient
 from inaptas.infrastructure.observability.logging import configurar_logging
 from inaptas.infrastructure.persistence.database import criar_engine, criar_fabrica_sessoes
@@ -95,10 +95,10 @@ def create_app(
     app.state.panel_auth = PainelAuthService(configuracao, app.state.redis_store)
     app.state.panel_consultas = PainelConsultaService(app.state.gateway_service)
     app.state.panel_dashboard = PainelDashboardService()
-    app.state.dify_client = DifyClient(
-        configuracao.dify_base_url,
-        configuracao.dify_api_key,
-        configuracao.dify_timeout_seconds,
+    app.state.n8n_client = N8nClient(
+        configuracao.n8n_internal_webhook_url,
+        configuracao.n8n_internal_webhook_token,
+        configuracao.n8n_timeout_seconds,
     )
     app.state.whatsapp_client = WhatsAppClient(
         access_token=configuracao.whatsapp_access_token,

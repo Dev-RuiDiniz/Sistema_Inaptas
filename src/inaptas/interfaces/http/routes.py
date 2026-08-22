@@ -13,6 +13,7 @@ from inaptas.infrastructure.integrations.webhooks import extrair_evento_id
 from inaptas.interfaces.http.dependencies import (
     exigir_rate_limit,
     exigir_token_interno,
+    exigir_token_orquestrador,
     obter_servico,
 )
 from inaptas.interfaces.http.schemas import CompanyLookupRequest, FiscalResponse
@@ -79,6 +80,17 @@ def criar_router() -> APIRouter:
     ) -> FiscalResponse:
         return await servico.consulta_completa(payload.cnpj)
 
+    @router.post(
+        "/v1/orchestrator/company/full-check",
+        response_model=FiscalResponse,
+        dependencies=[Depends(exigir_token_orquestrador), Depends(exigir_rate_limit)],
+    )
+    async def orchestrator_full_check(
+        payload: CompanyLookupRequest,
+        servico: Annotated[FiscalGatewayService, Depends(obter_servico)],
+    ) -> FiscalResponse:
+        return await servico.consulta_completa(payload.cnpj)
+
     @router.get("/webhooks/whatsapp")
     async def whatsapp_verification(
         request: Request,
@@ -120,12 +132,20 @@ def criar_router() -> APIRouter:
         if not primeiro_evento:
             return {"status": "duplicate", "event_id": evento_id}
 
-        resultado = await request.app.state.dify_client.enviar_contexto(payload)
+        resultado = await request.app.state.n8n_client.enviar_evento(
+            payload,
+            correlation_id=request.state.correlation_id,
+        )
+        if resultado.status != "accepted":
+            raise HTTPException(
+                status_code=503,
+                detail="Orquestração indisponível; o diagnóstico fiscal não foi confirmado",
+            )
         return {
-            "status": "processed",
+            "status": "accepted",
             "event_id": evento_id,
-            "dify_status": resultado.status,
-            "dify_error_code": resultado.error_code,
+            "n8n_status": resultado.status,
+            "n8n_error_code": resultado.error_code,
         }
 
     return router

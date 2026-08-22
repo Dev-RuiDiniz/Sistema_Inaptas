@@ -1,5 +1,8 @@
 # Spec: Arquitetura da Fase 1 — MVP Inaptas
 
+> Documento histórico de 20/08/2026. A arquitetura de orquestração registrada
+> aqui foi superada; consulte a spec vigente de migração para n8n/Ollama.
+
 **Status:** `EM_HOMOLOGAÇÃO`
 **Data:** 20/08/2026
 **Relaciona-se a:** `PRD.md` seções 4–12; `ROADMAP.md` Fase 1

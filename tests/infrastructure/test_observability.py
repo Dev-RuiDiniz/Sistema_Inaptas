@@ -38,10 +38,10 @@ def test_redige_credenciais_das_integracoes() -> None:
         {
             "whatsapp_access_token": "token-whatsapp",
             "whatsapp_app_secret": "segredo-whatsapp",
-            "nested": {"dify_api_key": "chave-dify"},
+            "nested": {"n8n_internal_webhook_token": "token-n8n"},
         }
     )
 
     assert evento["whatsapp_access_token"] == "[REDACTED]"
     assert evento["whatsapp_app_secret"] == "[REDACTED]"
-    assert evento["nested"]["dify_api_key"] == "[REDACTED]"
+    assert evento["nested"]["n8n_internal_webhook_token"] == "[REDACTED]"

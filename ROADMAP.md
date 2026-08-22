@@ -17,7 +17,7 @@ O Inaptas é o primeiro módulo de uma arquitetura evolutiva para o Regulariza.b
 
 O MVP operacional é composto por:
 
-- canal público WhatsApp Business Cloud API e orquestração Dify;
+- canal público WhatsApp Business Cloud API e orquestração n8n self-hosted;
 - Fiscal Gateway com contrato canônico e diagnóstico determinístico;
 - providers cadastrais e fiscais isolados, começando por ReceitaWS;
 - painel operacional do escritório, com OIDC, RBAC, consultas, histórico, relatórios e auditoria;
@@ -30,9 +30,9 @@ Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-espec
 | Dimensão | Estado | Evidência ou bloqueio |
 |---|---|---|
 | Implementação técnica do gateway e painel | `CONCLUÍDA` tecnicamente | Código na branch atual e testes automatizados. |
-| Validação automatizada | `CONCLUÍDA` | 66 testes aprovados. |
-| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | Compose executado localmente; containers saudáveis e validação externa ainda pendente. |
-| Homologação Meta/WhatsApp e Dify | Pendente externo | Contas, números, projetos e credenciais do contratante. |
+| Validação automatizada | `CONCLUÍDA` | 73 testes aprovados, 1 integração pulada; Ruff, MyPy, Alembic e scanner aprovados. |
+| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | Gateway, PostgreSQL e Redis saudáveis; pull do stack n8n/Ollama excedeu o limite local. |
+| Homologação Meta/WhatsApp, n8n e Ollama | Pendente externo | Domínios, VPS, contas, números, modelo e credenciais do contratante. |
 | Homologação OIDC do painel | Pendente externo | Issuer, client, callback, grupos e Redis do cliente. |
 | Homologação ReceitaWS | Pendente externo | Contratação, limites e CNPJ de teste autorizado. |
 | Homologação SERPRO/PGFN | Pendente externo | Contrato, e-CNPJ, credenciais e autorizações aplicáveis. |
@@ -50,13 +50,25 @@ O painel é parte do MVP operacional. Implementação técnica concluída não s
 e o hash do script inline, o CDN responde HTTP 200 e a API está `healthy`.
 Playwright confirmou título, rotas e schemas visíveis sem erro de console.
 
+### Migração n8n/Ollama em VPS
+
+**Spec:** [`specs/2026-08-22-migracao-n8n-vps.md`](specs/2026-08-22-migracao-n8n-vps.md)
+
+**Estado:** `EM_IMPLEMENTAÇÃO`
+
+**Evidência:** runtime sem integração legada, `N8nClient` com retry e token
+separado, cliente Ollama com fallback e bloqueio de afirmações sem evidência,
+workflow JSON autenticado, Compose/Caddy e documentação de implantação.
+O Compose foi validado com `docker compose config --quiet`; a subida completa
+ficou pendente porque o registry não concluiu o pull das imagens n8n/Ollama.
+
 ## Épicos do MVP
 
 ### Épico 1 — Canal público e orquestração
 
-WhatsApp recebe eventos idempotentes, o Dify conduz a conversa sem secrets fiscais e o usuário recebe explicação baseada em evidências.
+WhatsApp recebe eventos idempotentes, o n8n conduz a conversa sem secrets fiscais e o usuário recebe explicação baseada em evidências, com Ollama local opcional.
 
-Checklist: webhook verificado; assinatura validada; deduplicação; solicitação de CNPJ; resposta segura; Dify configurado somente após credenciais e prompt aprovados.
+Checklist: webhook verificado; assinatura validada; deduplicação; solicitação de CNPJ; resposta segura; workflow n8n importado; Ollama com fallback; credenciais aprovadas.
 
 ### Épico 2 — Fiscal Gateway e fontes
 
@@ -105,7 +117,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 
 - [ ] Confirmar conta Meta Business e permissões administrativas.
 - [ ] Confirmar número e credenciais da WhatsApp Business Cloud API.
-- [ ] Confirmar ambiente, projeto, prompt e chave da API do Dify.
+- [ ] Confirmar VPS, domínio, workflow n8n, modelo Ollama e credenciais do contratante.
 - [ ] Confirmar fonte cadastral do MVP, começando por ReceitaWS se contratada.
 - [ ] Confirmar e-CNPJ, contrato SERPRO e credenciais de homologação, quando aplicável.
 - [ ] Confirmar contratação e permissão da consulta PGFN.
@@ -118,7 +130,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 
 ## Preparação pré-credenciais — validação local
 
-**Estado:** implementação técnica `CONCLUÍDA`; homologação local `EM_HOMOLOGAÇÃO` por ausência do Docker.
+**Estado:** implementação técnica `CONCLUÍDA`; homologação local `EM_HOMOLOGAÇÃO` por pull incompleto das imagens n8n/Ollama.
 
 - [x] Specs de ambiente, segurança e operação.
 - [x] Migration automática no Compose.
@@ -129,9 +141,10 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 - [x] Configuração de produção e redaction de logs endurecidos.
 - [x] Scanner de possíveis secrets em arquivos versionados.
 - [x] Documentação de operação, comandos e bloqueios.
-- [!] Executar Compose e integração com PostgreSQL/Redis reais — Docker não está instalado no ambiente atual.
+- [x] Executar Gateway, PostgreSQL e Redis reais — containers saudáveis e `/health` respondendo `200`.
+- [!] Executar stack completo n8n/Ollama/Caddy — registry local não concluiu o pull das imagens.
 
-**Evidências:** `python -m pytest -q` com 66 aprovados e 1 integração pulada; Ruff, MyPy, Alembic e scanner de segurança aprovados.
+**Evidências:** `python -m pytest -q` com 73 aprovados e 1 integração pulada; Ruff, MyPy, Alembic, scanner e `docker compose config --quiet` aprovados.
 
 ## Fase 1 — MVP público e painel operacional
 
@@ -144,14 +157,14 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 - [x] Interfaces PGFN, SITFIS e ADE/Editais sem ativação indevida.
 - [x] `/health`, endpoints de consulta e webhook WhatsApp.
 - [x] Logs estruturados, correlation ID, auditoria, cache, rate limit e idempotência.
-- [x] Integrações preparadas para Dify e WhatsApp sem expor credenciais fiscais.
+- [x] Integrações preparadas para n8n/Ollama e WhatsApp sem expor credenciais fiscais.
 - [x] Docker/Compose e documentação de configuração segura.
 - [x] OIDC, RBAC, sessão Redis, painel, consultas, histórico e relatórios.
 - [x] Dashboard operacional e administração de usuários/retenção.
 - [!] POC com CNPJ real autorizado — depende da Fase 0.
 - [!] Login contra OIDC real e PostgreSQL/Redis reais — depende de credenciais e Docker.
 
-**Critérios de aceite:** CNPJ válido produz contrato canônico; inválido é rejeitado; formato alfanumérico é aceito; indisponibilidade permanece explícita; webhook duplicado não duplica consulta; secrets não aparecem no frontend, Dify ou logs; painel aplica RBAC e isolamento; relatórios preservam fonte, status e diagnóstico.
+**Critérios de aceite:** CNPJ válido produz contrato canônico; inválido é rejeitado; formato alfanumérico é aceito; indisponibilidade permanece explícita; webhook duplicado não duplica consulta; secrets não aparecem no frontend, n8n, Ollama ou logs; painel aplica RBAC e isolamento; relatórios preservam fonte, status e diagnóstico.
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 
@@ -200,7 +213,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | Dependência/risco | Impacto | Mitigação | Estado |
 |---|---:|---|---|
 | Meta/WhatsApp | Alto | Validar conta, webhook, assinatura e número em ambiente autorizado | Pendente externo |
-| Dify/LLM | Alto | Enviar somente contrato canônico e testar explicações com evidência | Pendente externo |
+| n8n/Ollama | Alto | Enviar somente contrato canônico, autenticar webhooks e usar fallback determinístico | Pendente externo |
 | SERPRO | Alto | Contrato, e-CNPJ, conector isolado e fonte alternativa controlada | Pendente externo |
 | PGFN/procurações | Alto | Bloquear sem vínculo válido e preservar indisponibilidade | Pendente externo |
 | OIDC do cliente | Alto | Testar issuer, PKCE, grupos, sessão e RBAC | Pendente externo |
@@ -216,8 +229,8 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 |---|---|---|---|
 | 20/08/2026 | Base SDD e governança inicial | `PRD.md`, `AGENTS.md`, `ROADMAP.md`, `MEMORY.md` e specs | Histórico preservado |
 | 20/08/2026 | Painel operacional implementado | Commits da branch atual e testes do painel | Homologação externa pendente |
-| 21/08/2026 | Spec-mãe e histórico consolidados | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` e índice | `DRAFT`/histórico em `EM_HOMOLOGAÇÃO` |
-| 21/08/2026 | Validação técnica de baseline | 66 testes, 1 integração pulada, Ruff, MyPy, Alembic e scanner | A repetir após documentação |
+| 21/08/2026 | Spec-mãe e histórico consolidados | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` e índice | `EM_IMPLEMENTAÇÃO`/histórico em `EM_HOMOLOGAÇÃO` |
+| 22/08/2026 | Validação técnica da migração | 73 testes, 1 integração pulada, Ruff, MyPy, Alembic, scanner e Compose config | Stack n8n/Ollama pendente de pull |
 | 22/08/2026 | Correção do Swagger sob CSP | Spec de correção, teste RED/GREEN, Compose reconstruído e `/docs` HTTP 200 | Homologação visual pendente |
 
 ## Validação documental e técnica final

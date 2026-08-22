@@ -3,6 +3,7 @@ Set-StrictMode -Version Latest
 
 $arquivos = @(git ls-files | Where-Object {
     $_ -and
+    (Test-Path -LiteralPath $_) -and
     $_ -ne ".env.example" -and
     $_ -ne "scripts/verificar-seguranca.ps1"
 })

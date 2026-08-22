@@ -6,7 +6,8 @@ Esta pasta organiza a documentação operacional do MVP público e do painel ope
 
 | Documento | Papel | Status |
 |---|---|---|
-| [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md) | Spec-mãe do MVP público + painel operacional | `DRAFT` |
+| [`2026-08-21-mvp-inaptas-especificacao-mae.md`](2026-08-21-mvp-inaptas-especificacao-mae.md) | Spec-mãe do MVP público + painel operacional | `EM_IMPLEMENTAÇÃO` |
+| [`2026-08-22-migracao-n8n-vps.md`](2026-08-22-migracao-n8n-vps.md) | Migração de orquestração para n8n self-hosted e Ollama em VPS | `EM_IMPLEMENTAÇÃO` |
 
 A spec-mãe deve ser atualizada quando houver mudança de escopo, contrato, integração, regra de negócio, critério de aceite ou decisão de homologação. Uma spec histórica não substitui a referência vigente.
 
@@ -20,6 +21,10 @@ A spec-mãe deve ser atualizada quando houver mudança de escopo, contrato, inte
 
 - [`2026-08-20-ambiente-integracao-local.md`](2026-08-20-ambiente-integracao-local.md) — Docker Compose, PostgreSQL, Redis, migrations e smoke tests. `EM_HOMOLOGAÇÃO`.
 - [`2026-08-22-correcao-swagger-csp.md`](2026-08-22-correcao-swagger-csp.md) — correção do carregamento do Swagger UI sob CSP. `EM_HOMOLOGAÇÃO`.
+
+Os documentos datados de 20/08 preservam decisões anteriores. Quando mencionarem
+uma arquitetura que não seja n8n/Ollama, devem ser lidos como histórico superado,
+não como autorização de implementação vigente.
 
 ### Segurança e operação
 

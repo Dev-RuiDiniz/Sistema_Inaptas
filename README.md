@@ -1,6 +1,6 @@
 # Inaptas — triagem cadastral e fiscal para escritórios
 
-O Inaptas organiza a primeira análise de uma empresa em um fluxo único: o cliente conversa pelo WhatsApp, o Dify conduz a interação, o Fiscal Gateway consulta fontes habilitadas e o escritório acompanha evidências pelo painel operacional.
+O Inaptas organiza a primeira análise de uma empresa em um fluxo único: o cliente conversa pelo WhatsApp, o Gateway valida o evento, o n8n self-hosted conduz o workflow, o Fiscal Gateway consulta fontes habilitadas e o escritório acompanha evidências pelo painel operacional.
 
 ## Posicionamento
 
@@ -32,9 +32,11 @@ O MVP centraliza o fluxo, registra fonte/status/horário, conserva o contexto da
 
 ```text
 Cliente no WhatsApp
-  → Dify conduz a conversa
+  → Fiscal Gateway valida assinatura e idempotência
+  → n8n self-hosted conduz o workflow
   → Fiscal Gateway consulta fontes habilitadas
   → normalização e diagnóstico rastreável
+  → Ollama local gera interpretação opcional
   → resposta explicada ao cliente
   → histórico, relatório e auditoria no painel do escritório
 ```
@@ -42,7 +44,7 @@ Cliente no WhatsApp
 ## O que o MVP entrega
 
 - Canal de entrada e saída para WhatsApp Business Cloud API.
-- Integração preparada com Dify, sem entregar credenciais fiscais ao modelo.
+- Workflow n8n exportável para WhatsApp, consulta no Gateway e interpretação opcional pelo Ollama local.
 - Fiscal Gateway FastAPI com endpoints de healthcheck, cadastro, status fiscal, PGFN, verificação completa e webhook.
 - Consulta cadastral inicial por ReceitaWS quando contratada e habilitada.
 - Interfaces para SERPRO CNPJ, PGFN, SITFIS e ADE/Editais, ativadas somente conforme contrato, credencial e autorização.
@@ -68,13 +70,13 @@ A disponibilidade, os limites de uso, a precisão e a vigência de dados de terc
 
 O desenvolvimento do MVP descrito nesta documentação é de **R$ 2.500,00**.
 
-APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, Dify, LLM, ReceitaWS, SERPRO, PGFN, OIDC e demais serviços de terceiros são contratados e pagos pelo contratante. Homologações externas, operação contínua, alta disponibilidade, novos módulos e mudanças de escopo devem ser avaliados separadamente.
+APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, n8n, Ollama/LLM, ReceitaWS, SERPRO, PGFN, OIDC e demais serviços de terceiros são contratados e pagos pelo contratante. Homologações externas, operação contínua, alta disponibilidade, novos módulos e mudanças de escopo devem ser avaliados separadamente.
 
 ## Status atual
 
-O gateway e o painel estão implementados tecnicamente. O baseline documentado tinha **66 testes aprovados**; na execução local de 22/08/2026, com as versões atualmente resolvidas pelo `pyproject.toml`, foram observados **65 aprovados, 1 pulado e 1 falha de compatibilidade no payload de webhook sem `Content-Type`**, além de um erro de tipagem do MyPy em `consultas.py`. Ruff, Alembic e scanner de segurança foram aprovados. O Swagger recebeu uma correção de CSP e aguarda confirmação visual no navegador.
+O gateway e o painel estão implementados tecnicamente. Na execução local de 22/08/2026, foram observados **73 testes aprovados e 1 integração pulada**. Ruff, MyPy, Alembic, scanner de segurança e validação sintática do Compose passaram. O Swagger recebeu uma correção de CSP e aguarda confirmação visual no navegador. O pull das imagens n8n/Ollama ainda depende da disponibilidade do registry local.
 
-A produção continua bloqueada até a validação do Docker, OIDC real, Meta/WhatsApp, Dify, providers contratados e uma POC com CNPJ real autorizado. Nenhuma credencial ou dado fiscal real é armazenado neste repositório.
+A produção continua bloqueada até a validação do Docker, OIDC real, Meta/WhatsApp, n8n/Ollama, providers contratados e uma POC com CNPJ real autorizado. Nenhuma credencial ou dado fiscal real é armazenado neste repositório.
 
 ## Documentação do projeto
 
@@ -86,6 +88,7 @@ A produção continua bloqueada até a validação do Docker, OIDC real, Meta/Wh
 - [Índice e histórico das specs](specs/README.md)
 - [Validação e operação local](docs/operacao/validacao-local.md)
 - [Painel do escritório](docs/operacao/painel-escritorio.md)
+- [Implantação n8n em VPS](docs/operacao/implantacao-vps-n8n.md)
 - [Escopo técnico de origem](escopo_tecnico_inaptas_regularizabr_atualizado.md)
 - [Plano de consolidação documental](docs/superpowers/plans/2026-08-21-consolidacao-mvp-documental.md)
 
@@ -109,4 +112,4 @@ python -m pytest tests/integration -m integracao -q
 Remove-Item Env:EXECUTAR_INTEGRACAO -ErrorAction SilentlyContinue
 ```
 
-O Compose inicia migrations, aplicação, PostgreSQL e Redis. Consulte o [guia de validação local](docs/operacao/validacao-local.md) para diagnóstico e operação segura.
+O Compose inicia migrations, Gateway/painel, PostgreSQL e Redis, além de n8n, PostgreSQL isolado do n8n, Ollama e Caddy. Consulte o [guia de validação local](docs/operacao/validacao-local.md) e o [guia de implantação em VPS](docs/operacao/implantacao-vps-n8n.md) para diagnóstico e operação segura.

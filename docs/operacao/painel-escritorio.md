@@ -2,10 +2,11 @@
 
 ## Escopo
 
-O painel é uma interface interna para contadores. O cliente final continua no
-WhatsApp. A aplicação é server-side com FastAPI/Jinja2; o navegador recebe HTML,
-CSS, JavaScript progressivo e cookie de sessão, nunca tokens fiscais ou o Bearer
-do Fiscal Gateway.
+O painel é a interface visual do cliente/escritório para contadores, operadores
+e administradores. O WhatsApp continua sendo um canal de entrada, mas o painel
+permite acompanhar consultas, evidências, relatórios e auditoria. A aplicação é
+server-side com FastAPI/Jinja2; o navegador recebe HTML, CSS, JavaScript
+progressivo e cookie de sessão, nunca tokens fiscais ou o Bearer do Gateway.
 
 ## Ativação
 
@@ -66,5 +67,7 @@ python -m alembic heads
 powershell -File scripts/verificar-seguranca.ps1
 ```
 
-O login real OIDC, o PostgreSQL/Redis reais e a POC com CNPJ autorizado continuam
-dependentes da Fase 0 e das credenciais do cliente.
+O login real OIDC, o PostgreSQL/Redis reais, o domínio HTTPS e a POC com CNPJ
+autorizado continuam dependentes da Fase 0 e das credenciais do cliente. A
+interface administrativa do n8n não substitui este painel e deve ficar restrita
+à operação técnica.

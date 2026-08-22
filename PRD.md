@@ -7,7 +7,7 @@
 
 ## 1. Resumo do produto
 
-O Inaptas é uma solução de atendimento automatizado para escritórios de contabilidade. O cliente conversa pelo WhatsApp, o Dify conduz o atendimento, o Fiscal Gateway valida o CNPJ e consulta fontes autorizadas, e o sistema devolve uma resposta estruturada, rastreável e explicada em linguagem natural.
+O Inaptas é uma solução de atendimento automatizado para escritórios de contabilidade. O cliente conversa pelo WhatsApp, o Fiscal Gateway valida o evento e o CNPJ, o n8n self-hosted conduz o workflow e o sistema devolve uma resposta estruturada, rastreável e explicada opcionalmente pelo Ollama local.
 
 O Inaptas é o primeiro módulo de uma arquitetura preparada para evoluir ao Regulariza.br.
 
@@ -42,7 +42,8 @@ Uma POC autorizada deve demonstrar `CNPJ → Fiscal Gateway → fonte disponíve
 ### Incluído
 
 - WhatsApp Business Cloud API como canal oficial.
-- Dify como orquestrador conversacional.
+- n8n self-hosted como orquestrador conversacional e operacional.
+- Ollama local como interpretação opcional, subordinada ao diagnóstico determinístico.
 - Backend próprio em Python/FastAPI, chamado Fiscal Gateway.
 - Conectores substituíveis para fontes cadastrais e fiscais.
 - Normalização de CNPJ, inclusive alfanumérico, sempre como string.
@@ -68,19 +69,20 @@ Uma POC autorizada deve demonstrar `CNPJ → Fiscal Gateway → fonte disponíve
 - Automação de login no e-CAC como mecanismo principal.
 - Inferência de Lucro Real, Lucro Presumido ou outro regime sem fonte oficial/autorizada.
 - Garantia de disponibilidade ou funcionamento indefinido de serviços de terceiros.
-- Custos de APIs, certificados, hospedagem, Meta/WhatsApp, Dify, LLM, domínio, backups e demais serviços externos.
+- Custos de APIs, certificados, hospedagem, Meta/WhatsApp, n8n, Ollama/LLM, domínio, backups e demais serviços externos.
 
 ## 5. Fluxo principal
 
 ```text
 Cliente
   → WhatsApp
-  → Dify identifica intenção e solicita CNPJ
+  → Fiscal Gateway valida assinatura e idempotência
+  → n8n identifica intenção e solicita CNPJ
   → Fiscal Gateway valida e normaliza o CNPJ
   → conectores consultam fontes habilitadas
   → normalizador consolida dados e fontes
   → regras determinísticas produzem diagnóstico
-  → Dify explica somente o que possui evidência
+  → Ollama opcional explica somente o que possui evidência
   → resposta retorna ao WhatsApp
 ```
 
@@ -101,7 +103,7 @@ O backend valida assinatura do webhook, deduplica eventos, aplica rate limit, co
 - **RF11:** gerar diagnóstico determinístico separado da interpretação da IA.
 - **RF12:** informar indisponibilidade sem afirmar ausência de pendência.
 - **RF13:** registrar auditoria mínima por consulta e fornecedor.
-- **RF14:** impedir exposição de secrets ao frontend, ao Dify e aos logs.
+- **RF14:** impedir exposição de secrets ao frontend, ao n8n, ao Ollama e aos logs.
 - **RF15:** aplicar timeout, retry controlado, cache e rate limit.
 - **RF16:** tornar webhooks idempotentes e resistentes à duplicidade.
 - **RF17:** trocar fornecedor por configuração/conector sem reconstruir a aplicação.
@@ -127,7 +129,7 @@ O backend valida assinatura do webhook, deduplica eventos, aplica rate limit, co
 
 ## 8. Contrato de resposta
 
-O Fiscal Gateway nunca deve enviar ao Dify respostas brutas e incompatíveis de cada fornecedor. O formato canônico inicial é:
+O Fiscal Gateway nunca deve enviar ao n8n ou ao Ollama respostas brutas e incompatíveis de cada fornecedor. O formato canônico inicial é:
 
 ```json
 {
@@ -177,7 +179,8 @@ O Fiscal Gateway nunca deve enviar ao Dify respostas brutas e incompatíveis de 
 | Integração | Papel | Política |
 |---|---|---|
 | WhatsApp Business Cloud API | Canal de entrada/saída | Oficial, com webhook validado |
-| Dify | Conversa e interpretação | Sem credenciais fiscais diretas |
+| n8n self-hosted | Workflow, conversa e integração com Gateway/WhatsApp | Sem credenciais fiscais de providers; webhook interno autenticado |
+| Ollama local | Interpretação textual opcional | Recebe contrato canônico mínimo; fallback determinístico em indisponibilidade |
 | ReceitaWS | Fonte cadastral de baixo atrito | Alternativa de MVP; não é fonte oficial |
 | SERPRO Consulta CNPJ | Cadastro oficial | Preferencial em produção quando contratado |
 | SERPRO/PGFN | Dívida Ativa da União | Depende de contrato e autenticação |
@@ -212,11 +215,12 @@ Estruturas mínimas preparadas:
 - Situação, motivo, data, Simples e SIMEI retornam apenas quando a fonte fornecer evidência.
 - Timeout ou falha não gera resposta fiscal falsa.
 
-### WhatsApp e Dify
+### WhatsApp, n8n e Ollama
 
 - O webhook recebe mensagem e valida sua assinatura.
 - Evento duplicado não gera consulta repetida.
-- Dify recebe o contexto estruturado.
+- n8n recebe somente eventos validados pelo Gateway e chama o endpoint protegido do orquestrador.
+- Ollama recebe o contrato canônico e pode devolver uma explicação; o workflow bloqueia afirmações sem evidência.
 - Resposta segura retorna ao usuário.
 
 ### SERPRO/PGFN
@@ -234,13 +238,13 @@ Estruturas mínimas preparadas:
 ### POC
 
 - Antes da segunda parcela, um CNPJ real autorizado percorre o fluxo `CNPJ → Fiscal Gateway → fonte → retorno estruturado`.
-- Na homologação E2E, quando as contas estiverem disponíveis, o fluxo completo `WhatsApp → Dify → Backend → fonte → WhatsApp` é demonstrado.
+- Na homologação E2E, quando as contas estiverem disponíveis, o fluxo completo `WhatsApp → Gateway → n8n → Gateway → fonte → Ollama opcional → WhatsApp` é demonstrado.
 
 ## 13. Riscos e limites comerciais
 
 Os riscos principais são acesso ao SERPRO, procuração fiscal, mudanças de APIs, alucinação do LLM, vazamento de dados, limites da ReceitaWS, CNPJ alfanumérico e mudança do formato SITFIS. A mitigação deve permanecer alinhada ao `ROADMAP.md`.
 
-O valor comercial de R$ 2.500,00 contempla o desenvolvimento do MVP, Fiscal Gateway, fluxo WhatsApp/Dify, consulta cadastral, arquitetura modular, normalização, regras determinísticas, preparação para PGFN/SITFIS/ADE, implantação, documentação e POC. Serviços, contratos, credenciais e custos de terceiros ficam fora do desenvolvimento.
+O valor comercial de R$ 2.500,00 contempla o desenvolvimento do MVP, Fiscal Gateway, workflow WhatsApp/n8n, consulta cadastral, arquitetura modular, normalização, regras determinísticas, preparação para PGFN/SITFIS/ADE, implantação, documentação e POC. Serviços, contratos, credenciais e custos de terceiros ficam fora do desenvolvimento.
 
 ## 14. Gestão de mudanças
 

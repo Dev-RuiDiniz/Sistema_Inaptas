@@ -1,7 +1,7 @@
 # Especificação-mãe do MVP Inaptas
 
 **ID:** SPEC-MVP-INAPTAS-2026-08-21  
-**Status:** `DRAFT`  
+**Status:** `EM_IMPLEMENTAÇÃO`
 **Versão:** 1.0  
 **Data:** 21/08/2026  
 **Responsável:** equipe do projeto  
@@ -13,7 +13,7 @@
 
 ## 1. Objetivo
 
-O Inaptas é um produto de triagem cadastral e fiscal para escritórios contábeis e seus operadores. O MVP recebe uma solicitação via WhatsApp, organiza a consulta no Dify, consulta fontes habilitadas por meio do Fiscal Gateway, normaliza os retornos, produz um diagnóstico determinístico e devolve uma resposta explicável. O painel operacional permite que o escritório consulte, acompanhe, audite e exporte as evidências dessas consultas.
+O Inaptas é um produto de triagem cadastral e fiscal para escritórios contábeis e seus operadores. O MVP recebe uma solicitação via WhatsApp, o Gateway valida o evento, o n8n self-hosted conduz o workflow, o Fiscal Gateway consulta fontes habilitadas, normaliza os retornos, produz um diagnóstico determinístico e o Ollama local pode devolver uma explicação segura. O painel operacional permite que o escritório consulte, acompanhe, audite e exporte as evidências dessas consultas.
 
 O objetivo comercial é reduzir o tempo de triagem e aumentar a rastreabilidade do atendimento, sem prometer regularidade fiscal, cobertura de fontes protegidas ou disponibilidade de terceiros que dependam de contratação, autorização ou credencial do contratante.
 
@@ -32,7 +32,8 @@ O objetivo comercial é reduzir o tempo de triagem e aumentar a rastreabilidade 
 ### 3.1 Incluído
 
 - Canal público de entrada e saída via WhatsApp Business Cloud API.
-- Orquestração conversacional pelo Dify, sem acesso direto do Dify a secrets fiscais.
+- Orquestração conversacional pelo n8n self-hosted, sem acesso do n8n ou do Ollama a secrets fiscais.
+- Interpretação opcional pelo Ollama local, com fallback determinístico quando indisponível.
 - Fiscal Gateway com conectores configuráveis e resposta canônica.
 - Consulta cadastral inicial por ReceitaWS, quando habilitada e contratada.
 - Ponto de integração para SERPRO CNPJ, condicionado a contrato, ambiente e credenciais válidos.
@@ -59,13 +60,14 @@ O objetivo comercial é reduzir o tempo de triagem e aumentar a rastreabilidade 
 ```text
 WhatsApp Cloud API
   → webhook validado e idempotente
-  → identificação da intenção pelo Dify
+  → validação de assinatura e idempotência pelo Gateway
+  → identificação da intenção pelo n8n
   → solicitação ou normalização do CNPJ
   → Fiscal Gateway
   → providers habilitados
   → normalização e contrato canônico
   → diagnóstico determinístico
-  → interpretação amigável do Dify, baseada somente em evidências
+  → interpretação amigável opcional do Ollama, baseada somente em evidências
   → resposta ao WhatsApp
 ```
 
@@ -197,7 +199,8 @@ Essas rotas descrevem o contrato existente no código nesta consolidação; qual
 | Integração | Papel | Dependência | Sem credencial ou contratação | Critério de homologação |
 |---|---|---|---|---|
 | WhatsApp Business Cloud API | Entrada e saída do canal público. | Conta Meta Business, número, token e webhook configurado pelo contratante. | Canal fica bloqueado; testes locais usam payloads controlados, sem enviar mensagens reais. | Challenge, assinatura, evento válido, deduplicação e envio de resposta em ambiente autorizado. |
-| Dify | Intenção, diálogo e explicação. | Projeto, ambiente e chave da API fornecidos pelo contratante. | Gateway continua testável; interpretação fica ausente ou indisponível, sem bloquear diagnóstico determinístico. | Prompt recebe somente contrato canônico e devolve explicação sem inventar evidência. |
+| n8n self-hosted | Intenção, diálogo, workflow e chamada dos serviços internos. | VPS, domínio e workflow importado. | Gateway aceita evento e devolve indisponibilidade se n8n falhar; diagnóstico não é afirmado. | Webhook interno autenticado e chamadas ao Gateway com token separado. |
+| Ollama local | Interpretação textual opcional. | VPS com capacidade para o modelo `qwen3:8b`. | `ai_interpretation` nulo ou fallback determinístico. | Prompt recebe contrato canônico e bloqueia afirmações sem evidência. |
 | ReceitaWS | Provider cadastral inicial. | Contratação e limites de uso aplicáveis. | Provider fica `disabled` ou `unavailable`; resposta não afirma situação cadastral. | CNPJ de teste autorizado, retorno normalizado, status, latência e auditoria. |
 | SERPRO CNPJ | Provider cadastral oficial. | Contrato, e-CNPJ/certificado, credenciais, endpoint e homologação SERPRO. | Não é tratado como fonte disponível; sem trial apresentado como garantia. | Autenticação homologada, consulta autorizada e evidência versionada do contrato/Swagger vigente. |
 | PGFN | Dados de dívida ativa quando autorizados. | Contrato, autenticação e autorização/procuração aplicável. | Retorna `disabled` ou `unavailable`; nunca afirma inexistência de dívida. | Consulta autorizada com CNPJ de teste e evidência de status da fonte. |
@@ -231,7 +234,7 @@ Nenhuma credencial, certificado, token, procuração ou CNPJ real é armazenado 
 ## 9. Segurança, LGPD e auditoria
 
 - Ambientes expostos exigem HTTPS/TLS.
-- Secrets ficam somente no backend ou em secret manager; não são enviados ao frontend, Dify, logs ou relatórios.
+- Secrets ficam somente no backend, n8n ou secret manager conforme sua finalidade; credenciais fiscais não são enviadas ao frontend, n8n, Ollama, logs ou relatórios.
 - O tratamento segue minimização, finalidade, controle de acesso, retenção e descarte compatíveis com LGPD e autorizações aplicáveis.
 - O painel usa OIDC, sessão segura, proteção CSRF nos formulários e RBAC por escritório e papel.
 - Dados fiscais protegidos somente podem ser consultados com contrato, autorização e base operacional válidos.
@@ -242,12 +245,12 @@ Nenhuma credencial, certificado, token, procuração ou CNPJ real é armazenado 
 
 A homologação do fluxo `CNPJ → Fiscal Gateway → fonte → retorno estruturado` exige um CNPJ real autorizado pelo contratante. O identificador não deve ser persistido em código, documentação pública ou exemplos versionados. A POC deve registrar somente evidências sanitizadas: ambiente, provider, versão/contrato, data, status, latência, contrato retornado e responsável pela autorização.
 
-Implementação técnica concluída não equivale a homologação externa. O MVP somente poderá avançar para produção quando Meta/WhatsApp, Dify, OIDC, providers fiscais, infraestrutura e autorização do CNPJ estiverem validados pelo responsável competente.
+Implementação técnica concluída não equivale a homologação externa. O MVP somente poderá avançar para produção quando Meta/WhatsApp, n8n, Ollama, OIDC, providers fiscais, infraestrutura e autorização do CNPJ estiverem validados pelo responsável competente.
 
 ## 11. Responsabilidades comerciais
 
 - Desenvolvimento do MVP Inaptas, conforme escopo desta spec: **R$ 2.500,00**.
-- APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, Dify, LLM, ReceitaWS, SERPRO, PGFN, OIDC e demais terceiros são responsabilidade financeira e operacional do contratante.
+- APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, n8n, Ollama/LLM, ReceitaWS, SERPRO, PGFN, OIDC e demais terceiros são responsabilidade financeira e operacional do contratante.
 - O valor do desenvolvimento não constitui contratação de dados protegidos, garantia de resposta de provider, garantia de regularidade fiscal ou disponibilidade de terceiros.
 - Mudanças de escopo, novos conectores, alta disponibilidade, operação continuada e homologações externas adicionais devem ser avaliadas separadamente.
 
@@ -256,7 +259,7 @@ Implementação técnica concluída não equivale a homologação externa. O MVP
 | Item | Estado | Responsável pela decisão | Evidência necessária |
 |---|---|---|---|
 | Conta Meta Business e número WhatsApp | Pendente externo | Contratante | Acesso administrativo e evento de teste. |
-| Projeto, chave e prompt do Dify | Pendente externo | Contratante e produto | Ambiente configurado e resposta controlada. |
+| VPS, workflow e credenciais do n8n; capacidade e modelo Ollama | Pendente externo | Contratante e produto | Ambiente configurado, workflow autenticado e resposta controlada. |
 | ReceitaWS e limites comerciais | Pendente externo | Contratante | Contrato e CNPJ de teste autorizado. |
 | SERPRO CNPJ | Pendente externo | Contratante | Contrato, e-CNPJ, credenciais e Swagger vigente. |
 | PGFN | Pendente externo | Contratante | Contrato, autorização/procuração e credenciais. |
@@ -304,7 +307,7 @@ Para reversão, desabilitar o provider ou canal afetado, interromper novas consu
 | ID PRD | Requisito resumido | Spec/fluxo | Código atual | Teste/evidência |
 |---|---|---|---|---|
 | RF01 | Receber mensagem pelo webhook WhatsApp | Seção 4.1 e 6.1 | `src/inaptas/interfaces/http/routes.py` | `tests/api/test_webhook.py` |
-| RF02 | Identificar consulta e solicitar CNPJ | Seção 4.1 | `src/inaptas/application` e integração Dify | `tests/application` |
+| RF02 | Identificar consulta e solicitar CNPJ | Seção 4.1 | `src/inaptas/application` e workflow n8n | `tests/application`, `tests/integration` |
 | RF03 | Normalizar CNPJ mascarado ou não | Seção 5.1 | `src/inaptas/domain` | `tests/domain` |
 | RF04 | Validar CNPJ numérico e alfanumérico | Seção 5.1 | `src/inaptas/domain` | `tests/domain` |
 | RF05 | Consultar fonte cadastral habilitada | Seções 7 e 8 | `src/inaptas/infrastructure/providers` | `tests/providers` |
@@ -313,7 +316,7 @@ Para reversão, desabilitar o provider ou canal afetado, interromper novas consu
 | RF08 | Consultar PGFN quando autorizado | Seção 7 | `src/inaptas/infrastructure/providers` | `tests/providers` |
 | RF09 | Manter extensões SITFIS/ADE | Seções 3.2 e 7 | interfaces de provider | `tests/providers` |
 | RF10 | Consolidar conectores em JSON único | Seção 5.4 | Fiscal Gateway/application | `tests/api` |
-| RF11 | Separar diagnóstico e IA | Seção 5.2 | `system_diagnosis`/Dify adapter | `tests/application` |
+| RF11 | Separar diagnóstico e IA | Seção 5.2 | `system_diagnosis`/Ollama e fallback n8n | `tests/application`, `tests/integrations` |
 | RF12 | Informar indisponibilidade sem negar pendência | Seções 5.3 e 8.1 | normalização/diagnóstico | `tests/application` e `tests/providers` |
 | RF13 | Registrar auditoria por consulta e fornecedor | Seções 8 e 9 | persistência/auditoria | `tests/persistence` e `tests/painel` |
 | RF14 | Impedir exposição de secrets | Seção 9 | configuração, logs e templates | `tests/security` |
@@ -327,7 +330,7 @@ Para reversão, desabilitar o provider ou canal afetado, interromper novas consu
 | ID PRD | Requisito resumido | Critério operacional | Evidência |
 |---|---|---|---|
 | RNF01 | HTTPS/TLS em exposição | Proxy/ambiente exposto configurado com TLS | Homologação de infraestrutura |
-| RNF02 | Secrets no servidor/secret manager | Ausência em frontend, Dify, logs e Git | Scanner e revisão de diff |
+| RNF02 | Secrets no servidor/secret manager | Ausência em frontend, n8n, Ollama, logs e Git | Scanner e revisão de diff |
 | RNF03 | Logs minimizados e sem tokens | Redaction e minimização aplicadas | `tests/security` |
 | RNF04 | CNPJ como string | Contratos, modelo e banco preservam valor | `tests/domain` e migrações |
 | RNF05 | Timeout por provider | Configuração e status `unavailable` | `tests/providers` |

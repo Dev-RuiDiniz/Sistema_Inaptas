@@ -1,5 +1,8 @@
 # Governança e base SDD — Plano de Implementação
 
+> Documento histórico de 20/08/2026. A arquitetura de orquestração registrada
+> aqui foi superada; consulte a spec vigente de migração para n8n/Ollama.
+
 > **Para agentes de implementação:** executar as tarefas em ordem, mantendo os checkboxes atualizados e seguindo `AGENTS.md`.
 
 **Objetivo:** estabelecer a governança documental e o fluxo Spec-Driven Development do Sistema Inaptas antes do primeiro incremento de código.

@@ -119,4 +119,4 @@ class PainelConsultaService:
             )
         )
         await session.commit()
-        return int(resultado.rowcount or 0)
+        return int(getattr(resultado, "rowcount", 0) or 0)

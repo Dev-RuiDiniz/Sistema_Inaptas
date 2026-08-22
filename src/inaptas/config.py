@@ -4,6 +4,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 TOKEN_LOCAL_PADRAO = "troque-este-token-local"
+TOKEN_ORQUESTRADOR_LOCAL_PADRAO = "troque-este-token-de-orquestracao-local"
 
 
 class ConfiguracaoInseguraError(ValueError):
@@ -24,9 +25,19 @@ class Settings(BaseSettings):
     whatsapp_phone_number_id: str = ""
     whatsapp_api_base_url: str = "https://graph.facebook.com"
     whatsapp_timeout_seconds: float = 10.0
-    dify_base_url: str = ""
-    dify_api_key: str = ""
-    dify_timeout_seconds: float = 10.0
+    n8n_internal_webhook_url: str = ""
+    n8n_internal_webhook_token: str = ""
+    n8n_timeout_seconds: float = 10.0
+    orchestrator_api_token: str = TOKEN_ORQUESTRADOR_LOCAL_PADRAO
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen3:8b"
+    ollama_timeout_seconds: float = 30.0
+    n8n_encryption_key: str = ""
+    n8n_host: str = "n8n.localhost"
+    n8n_editor_base_url: str = "http://localhost:5678"
+    webhook_url: str = "http://localhost:5678/"
+    executions_data_prune: bool = True
+    executions_data_max_age: int = 168
     rate_limit_enabled: bool = True
     internal_rate_limit: int = 60
     rate_limit_window_seconds: int = 60
@@ -58,6 +69,17 @@ def validar_configuracao(settings: Settings) -> None:
         return
     if not settings.internal_api_token or settings.internal_api_token == TOKEN_LOCAL_PADRAO:
         raise ConfiguracaoInseguraError("INTERNAL_API_TOKEN deve ser definido em produção")
+    if (
+        not settings.orchestrator_api_token
+        or settings.orchestrator_api_token == TOKEN_ORQUESTRADOR_LOCAL_PADRAO
+    ):
+        raise ConfiguracaoInseguraError("ORCHESTRATOR_API_TOKEN deve ser definido em produção")
+    if not settings.n8n_internal_webhook_url or not settings.n8n_internal_webhook_token:
+        raise ConfiguracaoInseguraError(
+            "N8N_INTERNAL_WEBHOOK_URL e N8N_INTERNAL_WEBHOOK_TOKEN devem ser definidos em produção"
+        )
+    if not settings.n8n_encryption_key:
+        raise ConfiguracaoInseguraError("N8N_ENCRYPTION_KEY deve ser definido em produção")
     if settings.openapi_enabled:
         raise ConfiguracaoInseguraError("OPENAPI_ENABLED deve ser false em produção")
     if not settings.trusted_hosts or "*" in settings.trusted_hosts:

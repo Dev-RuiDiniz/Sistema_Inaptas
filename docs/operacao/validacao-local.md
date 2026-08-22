@@ -33,7 +33,9 @@ credenciais, segurança e migrations. Não executa PostgreSQL ou Redis reais.
 ```
 
 O script cria `.env` a partir de `.env.example` somente quando necessário,
-valida o Compose, inicia PostgreSQL/Redis, executa a migration e sobe a API.
+valida o Compose, inicia PostgreSQL/Redis, executa a migration e sobe o
+Gateway/painel. O Compose completo também inclui n8n, PostgreSQL separado do
+n8n, Ollama e Caddy.
 Depois verifica `/health`, autenticação e rejeição de CNPJ inválido.
 
 O arquivo `.env` é local e ignorado pelo Git. Não substitua os valores locais
@@ -49,14 +51,17 @@ Remove-Item Env:EXECUTAR_INTEGRACAO -ErrorAction SilentlyContinue
 
 Os testes verificam health, PostgreSQL, Redis, migration, autenticação, CNPJ
 inválido, PGFN desabilitado e webhook sem assinatura válida. O teste de
-duplicidade do webhook só é executado com o segredo local falso e sem Dify
-configurado, para impedir chamadas externas acidentais.
+duplicidade do webhook só é executado sem n8n configurado, para impedir chamadas
+externas acidentais. O workflow deve ser importado e mantido inativo até a
+criação das credenciais locais.
 
 ## Operação e diagnóstico
 
 ```powershell
 docker compose ps
 docker compose logs -f app migrate
+docker compose logs -f n8n ollama caddy
+docker compose exec ollama ollama pull qwen3:8b
 docker compose down
 docker compose down -v
 ```
@@ -71,5 +76,7 @@ usado em ambiente compartilhado.
 - CNPJ real só pode ser usado na POC após autorização formal do cliente.
 - Docker ausente impede a validação real do Compose, mas não invalida a suíte
   mockada.
-- A Fase 0 continua pendente até as contas, contratos, autorizações e
-  titularidade do cliente serem confirmados.
+- O n8n deve ter o workflow importado, webhook com autenticação por header e
+  credencial do Gateway configurada antes de ser ativado.
+- A Fase 0 continua pendente até as contas, contratos, autorizações, domínio,
+  VPS e titularidade do cliente serem confirmados.

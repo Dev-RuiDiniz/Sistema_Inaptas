@@ -1,6 +1,13 @@
 # Escopo Técnico e Avaliação de Viabilidade
 ## Integração Dify AI + WhatsApp + Consulta CNPJ + Receita Federal/SERPRO + PGFN
 
+> **Registro vigente em 22/08/2026:** este documento é a origem técnica
+> histórica. A arquitetura Dify descrita no corpo foi superada pela spec-mãe
+> atualizada e por [`specs/2026-08-22-migracao-n8n-vps.md`](specs/2026-08-22-migracao-n8n-vps.md),
+> que define n8n self-hosted, Ollama local, Fiscal Gateway e painel próprio.
+> As referências abaixo são preservadas para rastreabilidade e não autorizam
+> implementação divergente da documentação vigente.
+
 **Documento técnico consolidado - versão final do MVP**  
 **Data da atualização:** 20/08/2026  
 **Objetivo:** definir o escopo técnico fechado do MVP Inaptas, incluindo arquitetura escalável para futura evolução ao Regulariza.br, fontes de dados, matriz de conectores, regras de IA, segurança, custos externos, propriedade dos ativos, entregáveis e critérios de homologação.

@@ -107,7 +107,7 @@ async def test_compose_migration_criou_tabela_de_versao() -> None:
     try:
         async with engine.connect() as conexao:
             resultado = await conexao.execute(text("SELECT version_num FROM alembic_version"))
-            assert resultado.scalar_one() == "0001_base"
+            assert resultado.scalar_one() == "0003_resultados_painel"
     finally:
         await engine.dispose()
 
@@ -124,8 +124,10 @@ def test_compose_webhook_sem_assinatura_e_rejeitado() -> None:
 
 
 def test_compose_webhook_duplicado_nao_chama_integracao_externa() -> None:
-    if _valor_env_local("DIFY_BASE_URL") or _valor_env_local("DIFY_API_KEY"):
-        pytest.skip("Dify configurado; teste local não deve chamar serviço externo")
+    if _valor_env_local("N8N_INTERNAL_WEBHOOK_URL") or _valor_env_local(
+        "N8N_INTERNAL_WEBHOOK_TOKEN"
+    ):
+        pytest.skip("n8n configurado; teste local não deve chamar serviço externo")
 
     segredo = _valor_env_local("WHATSAPP_APP_SECRET")
     if not segredo:
@@ -135,6 +137,7 @@ def test_compose_webhook_duplicado_nao_chama_integracao_externa() -> None:
     corpo = json.dumps(payload).encode()
     digest = hmac.new(segredo.encode(), corpo, hashlib.sha256).hexdigest()
     headers = {"X-Hub-Signature-256": f"sha256={digest}"}
+    headers["Content-Type"] = "application/json"
 
     primeira = httpx.post(
         f"{BASE_URL}/webhooks/whatsapp",
