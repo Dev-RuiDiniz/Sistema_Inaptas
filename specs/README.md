@@ -19,6 +19,7 @@ A spec-mãe deve ser atualizada quando houver mudança de escopo, contrato, inte
 ### Ambiente local
 
 - [`2026-08-20-ambiente-integracao-local.md`](2026-08-20-ambiente-integracao-local.md) — Docker Compose, PostgreSQL, Redis, migrations e smoke tests. `EM_HOMOLOGAÇÃO`.
+- [`2026-08-22-correcao-swagger-csp.md`](2026-08-22-correcao-swagger-csp.md) — correção do carregamento do Swagger UI sob CSP. `EM_HOMOLOGAÇÃO`.
 
 ### Segurança e operação
 

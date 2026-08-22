@@ -60,8 +60,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         resposta = await call_next(request)
         resposta.headers["Content-Security-Policy"] = (
-            "default-src 'self'; style-src 'self'; script-src 'self'; "
-            "img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+            "default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; "
+            "script-src 'self' https://cdn.jsdelivr.net "
+            "'sha256-QOOQu4W1oxGqd2nbXbxiA1Di6OHQOLQD+o+G9oWL8YY='; "
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         )
         resposta.headers["X-Frame-Options"] = "DENY"
         resposta.headers["Referrer-Policy"] = "no-referrer"

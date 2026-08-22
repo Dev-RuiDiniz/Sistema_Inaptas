@@ -72,7 +72,7 @@ APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, Dify, LLM, R
 
 ## Status atual
 
-O gateway e o painel estão implementados tecnicamente e cobertos por **66 testes aprovados**. Há **1 teste de integração pulado** porque Docker não está disponível no ambiente atual. Ruff, MyPy, Alembic e scanner de segurança foram aprovados.
+O gateway e o painel estão implementados tecnicamente. O baseline documentado tinha **66 testes aprovados**; na execução local de 22/08/2026, com as versões atualmente resolvidas pelo `pyproject.toml`, foram observados **65 aprovados, 1 pulado e 1 falha de compatibilidade no payload de webhook sem `Content-Type`**, além de um erro de tipagem do MyPy em `consultas.py`. Ruff, Alembic e scanner de segurança foram aprovados. O Swagger recebeu uma correção de CSP e aguarda confirmação visual no navegador.
 
 A produção continua bloqueada até a validação do Docker, OIDC real, Meta/WhatsApp, Dify, providers contratados e uma POC com CNPJ real autorizado. Nenhuma credencial ou dado fiscal real é armazenado neste repositório.
 

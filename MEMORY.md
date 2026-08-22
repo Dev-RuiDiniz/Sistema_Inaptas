@@ -134,6 +134,15 @@ O Dify não recebe diretamente credenciais fiscais. O backend controla autentica
 - O diff da consolidação contém somente documentação e planos; nenhum código, endpoint, secret, certificado, CNPJ real ou dado fiscal foi adicionado.
 - A integração em `main` e o push para `origin/main` permanecem como próximo passo de publicação.
 
+### 22/08/2026 — diagnóstico e correção do Swagger
+
+- O Compose foi iniciado com PostgreSQL, Redis e API saudáveis; `/health` retornou `200` com as duas dependências em `ok`.
+- `/docs` também retornava `200`, mas a página não renderizava porque a CSP permitia scripts e estilos somente de `'self'`, enquanto FastAPI referencia `cdn.jsdelivr.net`.
+- A correção restringiu `script-src` e `style-src` ao domínio exato do CDN, autorizou por hash SHA-256 o script inline emitido pelo FastAPI, preservou os headers de segurança e adicionou teste de regressão.
+- O teste foi observado em RED com a CSP antiga e em GREEN após a correção; a imagem Docker foi reconstruída e o novo header foi verificado no endpoint real.
+- Playwright confirmou o título, as rotas e os schemas visíveis no Swagger, sem erro de console.
+- A homologação visual permanece pendente; não foram adicionados secrets, credenciais ou dados fiscais.
+
 ## Regra de manutenção
 
 - Atualizar esta memória ao concluir uma tarefa, fechar decisão, mudar dependência, validar teste, encontrar bloqueio ou homologar integração.

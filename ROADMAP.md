@@ -25,13 +25,13 @@ O MVP operacional é composto por:
 
 Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-especificacao-mae.md) e [`MEMORY.md`](MEMORY.md).
 
-## Estado real em 21/08/2026
+## Estado real em 22/08/2026
 
 | Dimensão | Estado | Evidência ou bloqueio |
 |---|---|---|
 | Implementação técnica do gateway e painel | `CONCLUÍDA` tecnicamente | Código na branch atual e testes automatizados. |
 | Validação automatizada | `CONCLUÍDA` | 66 testes aprovados. |
-| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | 1 teste de integração pulado por Docker ausente no ambiente atual. |
+| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | Compose executado localmente; containers saudáveis e validação externa ainda pendente. |
 | Homologação Meta/WhatsApp e Dify | Pendente externo | Contas, números, projetos e credenciais do contratante. |
 | Homologação OIDC do painel | Pendente externo | Issuer, client, callback, grupos e Redis do cliente. |
 | Homologação ReceitaWS | Pendente externo | Contratação, limites e CNPJ de teste autorizado. |
@@ -39,6 +39,16 @@ Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-espec
 | Produção | Bloqueada por dependências | Não liberar antes das homologações e da POC autorizada. |
 
 O painel é parte do MVP operacional. Implementação técnica concluída não significa homologação externa nem disponibilidade em produção.
+
+### Correção de carregamento do Swagger UI
+
+**Spec:** [`specs/2026-08-22-correcao-swagger-csp.md`](specs/2026-08-22-correcao-swagger-csp.md)
+
+**Estado:** `EM_HOMOLOGAÇÃO`
+
+**Evidência:** `/docs` responde HTTP 200, o CSP libera somente o CDN necessário
+e o hash do script inline, o CDN responde HTTP 200 e a API está `healthy`.
+Playwright confirmou título, rotas e schemas visíveis sem erro de console.
 
 ## Épicos do MVP
 
@@ -208,6 +218,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | 20/08/2026 | Painel operacional implementado | Commits da branch atual e testes do painel | Homologação externa pendente |
 | 21/08/2026 | Spec-mãe e histórico consolidados | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` e índice | `DRAFT`/histórico em `EM_HOMOLOGAÇÃO` |
 | 21/08/2026 | Validação técnica de baseline | 66 testes, 1 integração pulada, Ruff, MyPy, Alembic e scanner | A repetir após documentação |
+| 22/08/2026 | Correção do Swagger sob CSP | Spec de correção, teste RED/GREEN, Compose reconstruído e `/docs` HTTP 200 | Homologação visual pendente |
 
 ## Validação documental e técnica final
 
