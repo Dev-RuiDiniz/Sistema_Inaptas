@@ -68,8 +68,6 @@ A disponibilidade, os limites de uso, a precisão e a vigência de dados de terc
 
 ## Escopo comercial
 
-O desenvolvimento do MVP descrito nesta documentação é de **R$ 2.500,00**.
-
 APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, n8n, Ollama/LLM, ReceitaWS, SERPRO, PGFN, OIDC e demais serviços de terceiros são contratados e pagos pelo contratante. Homologações externas, operação contínua, alta disponibilidade, novos módulos e mudanças de escopo devem ser avaliados separadamente.
 
 ## Status atual
