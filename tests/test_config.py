@@ -11,6 +11,30 @@ def test_configuracao_local_com_defaults_e_permitida() -> None:
     validar_configuracao(Settings(app_env="local"))
 
 
+def test_configuracao_portal_transparencia_valida_limites() -> None:
+    validar_configuracao(
+        Settings(
+            compliance_provider="portal_transparencia",
+            portal_transparencia_api_token="token-sintetico",
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    ("campo", "valor", "mensagem"),
+    [
+        ("portal_transparencia_timeout_seconds", 0, "TIMEOUT_SECONDS"),
+        ("portal_transparencia_max_retries", -1, "MAX_RETRIES"),
+        ("portal_transparencia_max_pages", 0, "MAX_PAGES"),
+    ],
+)
+def test_configuracao_portal_transparencia_rejeita_limites_invalidos(
+    campo: str, valor: int, mensagem: str
+) -> None:
+    with pytest.raises(ConfiguracaoInseguraError, match=mensagem):
+        validar_configuracao(Settings(**{campo: valor}))
+
+
 def test_producao_rejeita_token_interno_padrao() -> None:
     settings = Settings(
         app_env="production",

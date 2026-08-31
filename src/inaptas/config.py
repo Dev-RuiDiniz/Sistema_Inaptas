@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     minha_receita_base_url: str = "http://minha-receita:8000"
     minha_receita_timeout_seconds: float = 5.0
     minha_receita_max_retries: int = 2
+    compliance_provider: str = "disabled"
+    portal_transparencia_base_url: str = "https://api.portaldatransparencia.gov.br/api-de-dados"
+    portal_transparencia_api_token: str = ""
+    portal_transparencia_timeout_seconds: float = 5.0
+    portal_transparencia_max_retries: int = 2
+    portal_transparencia_max_pages: int = 10
     whatsapp_verify_token: str = ""
     whatsapp_app_secret: str = ""
     whatsapp_access_token: str = ""
@@ -79,7 +85,39 @@ def validar_configuracao(settings: Settings) -> None:
         )
     if settings.minha_receita_max_retries < 0:
         raise ConfiguracaoInseguraError("MINHA_RECEITA_MAX_RETRIES não pode ser negativo")
+    provedor_compliance = settings.compliance_provider.strip().lower()
+    if provedor_compliance not in {"disabled", "portal_transparencia"}:
+        raise ConfiguracaoInseguraError(
+            "COMPLIANCE_PROVIDER deve ser disabled ou portal_transparencia"
+        )
+    if settings.portal_transparencia_timeout_seconds <= 0:
+        raise ConfiguracaoInseguraError(
+            "PORTAL_TRANSPARENCIA_TIMEOUT_SECONDS deve ser maior que zero"
+        )
+    if settings.portal_transparencia_max_retries < 0:
+        raise ConfiguracaoInseguraError(
+            "PORTAL_TRANSPARENCIA_MAX_RETRIES nao pode ser negativo"
+        )
+    if settings.portal_transparencia_max_pages < 1:
+        raise ConfiguracaoInseguraError(
+            "PORTAL_TRANSPARENCIA_MAX_PAGES deve ser maior que zero"
+        )
+    if (
+        provedor_compliance == "portal_transparencia"
+        and not settings.portal_transparencia_api_token
+    ):
+        raise ConfiguracaoInseguraError(
+            "PORTAL_TRANSPARENCIA_API_TOKEN deve ser definido quando o provider estiver ativo"
+        )
     if settings.app_env.lower() not in {"prod", "production"}:
+        return
+    if (
+        provedor_compliance == "portal_transparencia"
+        and not settings.portal_transparencia_base_url.lower().startswith("https://")
+    ):
+        raise ConfiguracaoInseguraError(
+            "PORTAL_TRANSPARENCIA_BASE_URL deve usar HTTPS em producao"
+        )
         return
     if not settings.internal_api_token or settings.internal_api_token == TOKEN_LOCAL_PADRAO:
         raise ConfiguracaoInseguraError("INTERNAL_API_TOKEN deve ser definido em produção")

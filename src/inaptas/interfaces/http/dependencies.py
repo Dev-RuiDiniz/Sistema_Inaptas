@@ -6,14 +6,16 @@ from typing import Annotated, cast
 from fastapi import Header, HTTPException, Request, status
 from redis.exceptions import RedisError
 
-from inaptas.application.ports import CadastroProvider
+from inaptas.application.ports import CadastroProvider, ComplianceProvider
 from inaptas.application.services import FiscalGatewayService
 from inaptas.config import ConfiguracaoInseguraError, Settings
 from inaptas.infrastructure.providers.disabled import (
+    DisabledComplianceProvider,
     DisabledFiscalStatusProvider,
     DisabledPgfnProvider,
 )
 from inaptas.infrastructure.providers.minha_receita import MinhaReceitaProvider
+from inaptas.infrastructure.providers.portal_transparencia import PortalTransparenciaProvider
 from inaptas.infrastructure.providers.receitaws import ReceitaWsProvider
 
 
@@ -35,10 +37,27 @@ def criar_servico(settings: Settings) -> FiscalGatewayService:
         raise ConfiguracaoInseguraError(
             "CADASTRO_PROVIDER deve ser receitaws ou minha_receita"
         )
+    provedor_compliance = settings.compliance_provider.strip().lower()
+    compliance_provider: ComplianceProvider
+    if provedor_compliance == "portal_transparencia":
+        compliance_provider = PortalTransparenciaProvider(
+            base_url=settings.portal_transparencia_base_url,
+            api_token=settings.portal_transparencia_api_token,
+            timeout_seconds=settings.portal_transparencia_timeout_seconds,
+            max_retries=settings.portal_transparencia_max_retries,
+            max_pages=settings.portal_transparencia_max_pages,
+        )
+    elif provedor_compliance == "disabled":
+        compliance_provider = DisabledComplianceProvider()
+    else:
+        raise ConfiguracaoInseguraError(
+            "COMPLIANCE_PROVIDER deve ser disabled ou portal_transparencia"
+        )
     return FiscalGatewayService(
         cadastro_provider=cadastro_provider,
         pgfn_provider=DisabledPgfnProvider(),
         fiscal_status_provider=DisabledFiscalStatusProvider(),
+        compliance_provider=compliance_provider,
     )
 
 
