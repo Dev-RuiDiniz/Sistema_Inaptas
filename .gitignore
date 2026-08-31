@@ -34,6 +34,7 @@ logs/
 tmp/
 temp/
 data/local/
+.worktrees/
 
 # Credenciais e certificados
 *.pem
