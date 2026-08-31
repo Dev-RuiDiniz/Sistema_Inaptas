@@ -46,7 +46,8 @@ Cliente no WhatsApp
 - Canal de entrada e saída para WhatsApp Business Cloud API.
 - Workflow n8n exportável para WhatsApp, consulta no Gateway e interpretação opcional pelo Ollama local.
 - Fiscal Gateway FastAPI com endpoints de healthcheck, cadastro, status fiscal, PGFN, verificação completa e webhook.
-- Consulta cadastral inicial por ReceitaWS quando contratada e habilitada.
+- Consulta cadastral por provider selecionável: Minha Receita self-hosted para
+  dados públicos periódicos ou ReceitaWS quando explicitamente configurada.
 - Interfaces para SERPRO CNPJ, PGFN, SITFIS e ADE/Editais, ativadas somente conforme contrato, credencial e autorização.
 - Normalização de CNPJ numérico e alfanumérico como string.
 - Contrato canônico com `source_data`, `system_diagnosis`, `ai_interpretation` e status por fonte.
@@ -64,7 +65,7 @@ O escritório ganha um processo reproduzível para receber solicitações, acomp
 
 O Inaptas não promete regularidade fiscal, inexistência de dívidas, resposta de fonte indisponível ou cobertura automática de serviços protegidos. PGFN, SERPRO, SITFIS, e-CAC e dados fiscais protegidos dependem de contrato, autorização, certificados, credenciais e ambiente válidos. O produto não usa scraping como estratégia principal, não faz bypass de CAPTCHA e não automatiza login no e-CAC.
 
-A disponibilidade, os limites de uso, a precisão e a vigência de dados de terceiros dependem dos respectivos providers. Uma fonte indisponível será apresentada como indisponível ou desconhecida, nunca como confirmação de ausência de pendência.
+A disponibilidade, os limites de uso, a precisão e a vigência de dados de terceiros dependem dos respectivos providers. O Minha Receita exige carga mensal do snapshot e armazenamento aproximado de 180 GB. Uma fonte indisponível ou atrasada será apresentada como indisponível ou desconhecida, nunca como confirmação de ausência de pendência.
 
 ## Escopo comercial
 

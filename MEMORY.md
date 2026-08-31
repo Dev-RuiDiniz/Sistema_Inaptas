@@ -4,11 +4,11 @@
 
 ## Estado atual
 
-- **Data da última atualização:** 21/08/2026.
+- **Data da última atualização:** 31/08/2026.
 - **Produto:** Inaptas.
 - **Direção futura:** Regulariza.br modular.
 - **Fase:** implementação técnica do MVP público e painel concluída; homologação externa e produção aguardam dependências.
-- **Branch atual:** `funcionalidade/frontend-painel-escritorio`.
+- **Branch atual:** `funcionalidade/minha-receita`.
 - **Estado da branch na descoberta:** 9 commits além de `main`; após os seis commits documentais de plano, specs, governança, acompanhamento e README, 15 commits além de `main`.
 - **Remoto de publicação:** `origin`, com destino final `origin/main`.
 - **Fonte macro:** `PRD.md`.
@@ -21,7 +21,7 @@
 - Fluxos de WhatsApp/n8n, providers cadastrais/fiscais e painel operacional preparados sem credenciais reais.
 - Painel faz parte do MVP operacional: OIDC, sessão server-side/Redis, RBAC, consultas manuais, histórico, relatórios PDF/CSV, dashboard, usuários, retenção e auditoria.
 - PostgreSQL, Redis, migrations, Compose, healthcheck, cache, rate limit, idempotência, logs redigidos e segurança estão preparados.
-- Validação técnica registrada nesta consolidação: **66 testes aprovados**, **1 teste de integração pulado por ausência do Docker**, Ruff aprovado, MyPy aprovado, Alembic aprovado e scanner de segurança aprovado.
+- Validação desta tarefa: **88 testes aprovados**, **1 teste de integração pulado por Docker indisponível**, Ruff aprovado, MyPy aprovado, Alembic aprovado, scanner de segurança aprovado e `docker compose config --quiet` aprovado.
 - Docker/Compose, OIDC real e POC com CNPJ real autorizado ainda não foram homologados neste ambiente.
 
 ## Decisões confirmadas
@@ -35,7 +35,7 @@
 7. A resposta separa `source_data`, `system_diagnosis` e `ai_interpretation`.
 8. A IA não pode inferir situação fiscal, dívida, regime, pendência ou ausência de problema sem evidência válida.
 9. SITFIS e ADE/Editais são extensões; bypass de CAPTCHA, scraping agressivo e login automatizado no e-CAC são proibidos.
-10. ReceitaWS é o provider cadastral inicial; SERPRO e PGFN dependem de contrato, credenciais e autorizações.
+10. Minha Receita é provider cadastral self-hosted selecionável por configuração; ReceitaWS permanece selecionável explicitamente. SERPRO e PGFN dependem de contrato, credenciais e autorizações.
 11. PostgreSQL atende persistência/auditoria e Redis atende sessão, cache, rate limit e idempotência, conforme o ambiente.
 12. A retenção inicial documentada é de 90 dias, sujeita à política válida do contratante e às obrigações aplicáveis.
 13. O desenvolvimento do MVP custa R$ 2.500,00; APIs, certificados, infraestrutura, Meta, n8n, Ollama/LLM e demais terceiros ficam sob responsabilidade do contratante.
@@ -154,6 +154,14 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 - A suíte local passou com 73 testes e 1 integração pulada; Ruff, MyPy, Alembic, scanner, `git diff --check` e `docker compose config --quiet` passaram.
 - Gateway, PostgreSQL e Redis locais estão saudáveis. O pull das imagens n8n/Ollama excedeu o limite do registry local; a homologação completa da infraestrutura permanece pendente.
 - Nenhum secret, certificado, CNPJ real ou dado fiscal foi adicionado. Documentos anteriores que citam a arquitetura legada foram marcados como históricos/superados.
+
+### 31/08/2026 — integração do provider Minha Receita
+
+- O escopo foi aprovado explicitamente nesta conversa e formalizado em `specs/2026-08-31-integracao-minha-receita.md`.
+- Foi implementado o adapter `MinhaReceitaProvider`, com mapeamento cadastral, preservação de CNPJ alfanumérico, timeout, retry limitado e classificação segura de timeout, conexão, 404, 429, 5xx, autorização, JSON inválido e payload incompatível.
+- `CADASTRO_PROVIDER` seleciona `minha_receita` ou `receitaws` sem fallback automático. A indisponibilidade ou ausência do snapshot não altera o diagnóstico para regularidade fiscal.
+- O Compose recebeu API Minha Receita, PostgreSQL dedicado, volumes próprios e serviço de carga manual sem portas públicas. A operação documenta atualização mensal e aproximadamente 180 GB de armazenamento; a VPS anteriormente prevista com 80 GB deve ser redimensionada.
+- PGFN, SERPRO, SITFIS, ADE e workflow WhatsApp alfanumérico permanecem fora desta tarefa. Nenhum secret, CNPJ real ou dado fiscal foi adicionado.
 
 ## Regra de manutenção
 

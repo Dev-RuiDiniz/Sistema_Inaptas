@@ -19,22 +19,23 @@ O MVP operacional é composto por:
 
 - canal público WhatsApp Business Cloud API e orquestração n8n self-hosted;
 - Fiscal Gateway com contrato canônico e diagnóstico determinístico;
-- providers cadastrais e fiscais isolados, começando por ReceitaWS;
+- providers cadastrais e fiscais isolados, com Minha Receita self-hosted ou ReceitaWS selecionáveis;
 - painel operacional do escritório, com OIDC, RBAC, consultas, histórico, relatórios e auditoria;
 - persistência PostgreSQL, cache/sessão/rate limit Redis, Docker e documentação.
 
 Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-especificacao-mae.md) e [`MEMORY.md`](MEMORY.md).
 
-## Estado real em 22/08/2026
+## Estado real em 31/08/2026
 
 | Dimensão | Estado | Evidência ou bloqueio |
 |---|---|---|
 | Implementação técnica do gateway e painel | `CONCLUÍDA` tecnicamente | Código na branch atual e testes automatizados. |
-| Validação automatizada | `CONCLUÍDA` | 73 testes aprovados, 1 integração pulada; Ruff, MyPy, Alembic e scanner aprovados. |
+| Validação automatizada | `CONCLUÍDA` | 88 testes aprovados, 1 integração pulada por Docker indisponível; Ruff, MyPy, Alembic e scanner aprovados. |
 | Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | Gateway, PostgreSQL e Redis saudáveis; pull do stack n8n/Ollama excedeu o limite local. |
 | Homologação Meta/WhatsApp, n8n e Ollama | Pendente externo | Domínios, VPS, contas, números, modelo e credenciais do contratante. |
 | Homologação OIDC do painel | Pendente externo | Issuer, client, callback, grupos e Redis do cliente. |
 | Homologação ReceitaWS | Pendente externo | Contratação, limites e CNPJ de teste autorizado. |
+| Homologação Minha Receita | `EM_HOMOLOGAÇÃO` | Carga mensal do snapshot, imagem fixada e teste integrado dependem do ambiente Docker/VPS. |
 | Homologação SERPRO/PGFN | Pendente externo | Contrato, e-CNPJ, credenciais e autorizações aplicáveis. |
 | Produção | Bloqueada por dependências | Não liberar antes das homologações e da POC autorizada. |
 
@@ -61,6 +62,20 @@ separado, cliente Ollama com fallback e bloqueio de afirmações sem evidência,
 workflow JSON autenticado, Compose/Caddy e documentação de implantação.
 O Compose foi validado com `docker compose config --quiet`; a subida completa
 ficou pendente porque o registry não concluiu o pull das imagens n8n/Ollama.
+
+### Integração do provider Minha Receita
+
+**Spec:** [`specs/2026-08-31-integracao-minha-receita.md`](specs/2026-08-31-integracao-minha-receita.md)
+
+**Estado:** implementação técnica concluída; `EM_HOMOLOGAÇÃO` por depender da
+carga mensal do snapshot, da imagem fixada e da validação integrada em Docker.
+
+O Gateway seleciona explicitamente `minha_receita` ou `receitaws`, sem fallback
+implícito. O provider interno consulta apenas dados cadastrais, situação
+cadastral e Simples/MEI; PGFN, SERPRO, SITFIS e ADE permanecem fora deste
+incremento. A infraestrutura adiciona API, PostgreSQL dedicado, volume próprio
+e serviço de carga manual, sem portas públicas. A carga inicial requer cerca
+de 180 GB, então a previsão de VPS de 80 GB não é suficiente.
 
 ## Épicos do MVP
 
@@ -98,6 +113,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | `TASK-MVP-004` | Atualizar roadmap e memória | `ROADMAP.md` e `MEMORY.md` | `[x]` concluída | `d63fed7` |
 | `TASK-MVP-005` | Atualizar visão comercial | `README.md` | `[x]` concluída | `f7d8dc0` |
 | `TASK-MVP-006` | Validar documentação e publicar | evidências, validações e `origin/main` | `[x]` validação concluída; publicação na etapa de integração | `docs: registrar validação documental do mvp` |
+| `TASK-MINHA-RECEITA-001` | Integrar provider cadastral Minha Receita | provider, seleção, Compose, carga e documentação | `[x]` implementação técnica concluída; homologação externa pendente | branch `funcionalidade/minha-receita` |
 
 ## Marco 0 — Governança e base SDD
 

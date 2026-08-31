@@ -35,11 +35,32 @@ credenciais, segurança e migrations. Não executa PostgreSQL ou Redis reais.
 O script cria `.env` a partir de `.env.example` somente quando necessário,
 valida o Compose, inicia PostgreSQL/Redis, executa a migration e sobe o
 Gateway/painel. O Compose completo também inclui n8n, PostgreSQL separado do
-n8n, Ollama e Caddy.
+n8n, Ollama, Caddy e o Minha Receita com PostgreSQL dedicado.
 Depois verifica `/health`, autenticação e rejeição de CNPJ inválido.
 
 O arquivo `.env` é local e ignorado pelo Git. Não substitua os valores locais
 por credenciais de produção neste roteiro.
+
+## Carga do Minha Receita
+
+O provider `minha_receita` consulta somente o serviço interno. A base precisa
+ser carregada manualmente com os dados públicos da Receita Federal; o serviço
+não deve ser tratado como uma fonte em tempo real. A carga inicial exige
+aproximadamente 180 GB de armazenamento, além do espaço do restante da
+aplicação.
+
+```powershell
+docker compose up -d minha-receita-postgres minha-receita
+docker compose --profile cadastro-dados run --rm minha-receita-sync download <AAAA-MM> --directory /data
+docker compose --profile cadastro-dados run --rm minha-receita-sync create
+docker compose --profile cadastro-dados run --rm minha-receita-sync transform --directory /data
+```
+
+Repita a carga mensalmente, seguindo o passo a passo oficial do Minha Receita
+e confirmando o mês publicado pela Receita Federal. Use uma janela operacional
+e monitore espaço, tempo da carga e saúde da API. Não habilite o provider no
+ambiente do cliente antes de validar a imagem fixada, a carga e a resposta
+com dados autorizados.
 
 ## Testes de integração
 
@@ -73,6 +94,8 @@ usado em ambiente compartilhado.
 ## Critérios e bloqueios
 
 - Providers externos permanecem mockados ou `disabled`.
+- `CADASTRO_PROVIDER=minha_receita` não cria fallback automático para
+  ReceitaWS; indisponibilidade do snapshot permanece explícita.
 - CNPJ real só pode ser usado na POC após autorização formal do cliente.
 - Docker ausente impede a validação real do Compose, mas não invalida a suíte
   mockada.

@@ -55,6 +55,43 @@ services:
       timeout: 3s
       retries: 10
 
+  minha-receita-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${MINHA_RECEITA_DB_NAME:-minhareceita}
+      POSTGRES_USER: ${MINHA_RECEITA_DB_USER:-minhareceita}
+      POSTGRES_PASSWORD: ${MINHA_RECEITA_DB_PASSWORD:-troque-esta-senha-minha-receita-local}
+    volumes:
+      - minha-receita_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MINHA_RECEITA_DB_USER:-minhareceita} -d ${MINHA_RECEITA_DB_NAME:-minhareceita}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minha-receita:
+    # Em produção, substituir por uma tag de versão ou digest validado.
+    image: ${MINHA_RECEITA_IMAGE:-atcr.io/cuducos.me/minha-receita:main}
+    command: ["api"]
+    environment:
+      DATABASE_URL: postgresql://${MINHA_RECEITA_DB_USER:-minhareceita}:${MINHA_RECEITA_DB_PASSWORD:-troque-esta-senha-minha-receita-local}@minha-receita-postgres:5432/${MINHA_RECEITA_DB_NAME:-minhareceita}
+      PORT: 8000
+    depends_on:
+      minha-receita-postgres:
+        condition: service_healthy
+
+  minha-receita-sync:
+    image: ${MINHA_RECEITA_IMAGE:-atcr.io/cuducos.me/minha-receita:main}
+    profiles: ["cadastro-dados"]
+    environment:
+      DATABASE_URL: postgresql://${MINHA_RECEITA_DB_USER:-minhareceita}:${MINHA_RECEITA_DB_PASSWORD:-troque-esta-senha-minha-receita-local}@minha-receita-postgres:5432/${MINHA_RECEITA_DB_NAME:-minhareceita}
+    volumes:
+      - minha_receita_etl_data:/data
+    depends_on:
+      minha-receita-postgres:
+        condition: service_healthy
+    command: ["--help"]
+
   n8n-postgres:
     image: postgres:16-alpine
     environment:
@@ -142,3 +179,5 @@ volumes:
   ollama_data:
   caddy_data:
   caddy_config:
+  minha-receita_data:
+  minha_receita_etl_data:

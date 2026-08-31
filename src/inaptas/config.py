@@ -17,8 +17,12 @@ class Settings(BaseSettings):
     internal_api_token: str = TOKEN_LOCAL_PADRAO
     database_url: str = "postgresql+asyncpg://inaptas:inaptas@localhost:5432/inaptas"
     redis_url: str = "redis://localhost:6379/0"
+    cadastro_provider: str = "receitaws"
     receitaws_base_url: str = "https://www.receitaws.com.br"
     receitaws_timeout_seconds: float = 5.0
+    minha_receita_base_url: str = "http://minha-receita:8000"
+    minha_receita_timeout_seconds: float = 5.0
+    minha_receita_max_retries: int = 2
     whatsapp_verify_token: str = ""
     whatsapp_app_secret: str = ""
     whatsapp_access_token: str = ""
@@ -65,6 +69,16 @@ def get_settings() -> Settings:
 
 
 def validar_configuracao(settings: Settings) -> None:
+    if settings.cadastro_provider.strip().lower() not in {"receitaws", "minha_receita"}:
+        raise ConfiguracaoInseguraError(
+            "CADASTRO_PROVIDER deve ser receitaws ou minha_receita"
+        )
+    if settings.minha_receita_timeout_seconds <= 0:
+        raise ConfiguracaoInseguraError(
+            "MINHA_RECEITA_TIMEOUT_SECONDS deve ser maior que zero"
+        )
+    if settings.minha_receita_max_retries < 0:
+        raise ConfiguracaoInseguraError("MINHA_RECEITA_MAX_RETRIES não pode ser negativo")
     if settings.app_env.lower() not in {"prod", "production"}:
         return
     if not settings.internal_api_token or settings.internal_api_token == TOKEN_LOCAL_PADRAO:

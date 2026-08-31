@@ -6,21 +6,37 @@ from typing import Annotated, cast
 from fastapi import Header, HTTPException, Request, status
 from redis.exceptions import RedisError
 
+from inaptas.application.ports import CadastroProvider
 from inaptas.application.services import FiscalGatewayService
-from inaptas.config import Settings
+from inaptas.config import ConfiguracaoInseguraError, Settings
 from inaptas.infrastructure.providers.disabled import (
     DisabledFiscalStatusProvider,
     DisabledPgfnProvider,
 )
+from inaptas.infrastructure.providers.minha_receita import MinhaReceitaProvider
 from inaptas.infrastructure.providers.receitaws import ReceitaWsProvider
 
 
 def criar_servico(settings: Settings) -> FiscalGatewayService:
-    return FiscalGatewayService(
-        cadastro_provider=ReceitaWsProvider(
+    provedor_cadastral = settings.cadastro_provider.strip().lower()
+    cadastro_provider: CadastroProvider
+    if provedor_cadastral == "minha_receita":
+        cadastro_provider = MinhaReceitaProvider(
+            base_url=settings.minha_receita_base_url,
+            timeout_seconds=settings.minha_receita_timeout_seconds,
+            max_retries=settings.minha_receita_max_retries,
+        )
+    elif provedor_cadastral == "receitaws":
+        cadastro_provider = ReceitaWsProvider(
             base_url=settings.receitaws_base_url,
             timeout_seconds=settings.receitaws_timeout_seconds,
-        ),
+        )
+    else:
+        raise ConfiguracaoInseguraError(
+            "CADASTRO_PROVIDER deve ser receitaws ou minha_receita"
+        )
+    return FiscalGatewayService(
+        cadastro_provider=cadastro_provider,
         pgfn_provider=DisabledPgfnProvider(),
         fiscal_status_provider=DisabledFiscalStatusProvider(),
     )
