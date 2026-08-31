@@ -1,10 +1,14 @@
 # Spec: Integração da API do Portal da Transparência
 
-**Status:** EM_IMPLEMENTAÇÃO  
+**Status:** EM_HOMOLOGAÇÃO
 **Data:** 31/08/2026  
 **Relaciona-se a:** PRD, spec-mãe do MVP e `ROADMAP.md`  
 **Aprovação:** escopo aprovado explicitamente nesta conversa em 31/08/2026.  
 **Transição registrada:** `APROVADA → EM_IMPLEMENTAÇÃO → EM_HOMOLOGAÇÃO`.
+
+**Evidência técnica:** commits da branch `funcionalidade/portal-transparencia`,
+testes mockados e validações automatizadas concluídas. A homologação externa
+permanece pendente de token, ambiente Docker/VPS e CNPJ autorizado.
 
 ## Objetivo
 

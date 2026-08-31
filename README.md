@@ -48,6 +48,9 @@ Cliente no WhatsApp
 - Fiscal Gateway FastAPI com endpoints de healthcheck, cadastro, status fiscal, PGFN, verificação completa e webhook.
 - Consulta cadastral por provider selecionável: Minha Receita self-hosted para
   dados públicos periódicos ou ReceitaWS quando explicitamente configurada.
+- Compliance opcional por provider separado para consultar registros CEIS, CNEP
+  e CEPIM no Portal da Transparência; essa fonte não é PGFN, CND nem prova de
+  regularidade fiscal.
 - Interfaces para SERPRO CNPJ, PGFN, SITFIS e ADE/Editais, ativadas somente conforme contrato, credencial e autorização.
 - Normalização de CNPJ numérico e alfanumérico como string.
 - Contrato canônico com `source_data`, `system_diagnosis`, `ai_interpretation` e status por fonte.
@@ -88,6 +91,7 @@ A produção continua bloqueada até a validação do Docker, OIDC real, Meta/Wh
 - [Validação e operação local](docs/operacao/validacao-local.md)
 - [Painel do escritório](docs/operacao/painel-escritorio.md)
 - [Implantação n8n em VPS](docs/operacao/implantacao-vps-n8n.md)
+- [Integração do Portal da Transparência](specs/2026-08-31-integracao-portal-transparencia.md)
 - [Escopo técnico de origem](escopo_tecnico_inaptas_regularizabr_atualizado.md)
 - [Plano de consolidação documental](docs/superpowers/plans/2026-08-21-consolidacao-mvp-documental.md)
 

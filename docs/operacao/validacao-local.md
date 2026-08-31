@@ -62,6 +62,25 @@ e monitore espaço, tempo da carga e saúde da API. Não habilite o provider no
 ambiente do cliente antes de validar a imagem fixada, a carga e a resposta
 com dados autorizados.
 
+## Provider do Portal da Transparência
+
+O provider de compliance fica desligado por padrão. Quando houver necessidade
+de homologação, solicite o token no [cadastro oficial da API](https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email)
+e armazene-o em secret manager. Injete o valor somente no ambiente do Gateway,
+sem colocá-lo no `.env.example`, no n8n, em fixtures ou em logs.
+
+```powershell
+$env:COMPLIANCE_PROVIDER="portal_transparencia"
+# Defina PORTAL_TRANSPARENCIA_API_TOKEN pelo mecanismo de secrets da implantação.
+```
+
+O Gateway usa HTTPS, consulta somente CEIS, CNEP e CEPIM, pagina até
+`PORTAL_TRANSPARENCIA_MAX_PAGES` e faz retry limitado para 429 e 5xx. Timeout,
+erro de conexão e indisponibilidade deixam a fonte inconclusiva. Uma resposta
+vazia significa apenas que nenhum registro foi localizado nos três datasets;
+não significa ausência de dívida ou regularidade fiscal. Teste real exige CNPJ
+autorizado fora do repositório.
+
 ## Testes de integração
 
 ```powershell

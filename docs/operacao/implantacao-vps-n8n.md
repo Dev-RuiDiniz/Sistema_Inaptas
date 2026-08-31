@@ -69,6 +69,27 @@ Depois:
 9. Ative o workflow somente após testar assinatura, idempotência, consulta e
    fallback.
 
+## Portal da Transparência
+
+O Portal da Transparência é um provider externo de compliance. O Gateway acessa
+por HTTPS os endpoints CEIS, CNEP e CEPIM; não há serviço ou banco adicional no
+Compose. Cadastre o token no portal, guarde-o em secret manager e injete-o
+somente no Gateway com:
+
+```text
+COMPLIANCE_PROVIDER=portal_transparencia
+PORTAL_TRANSPARENCIA_BASE_URL=https://api.portaldatransparencia.gov.br/api-de-dados
+PORTAL_TRANSPARENCIA_API_TOKEN=<secret-fornecido-pelo-secret-manager>
+```
+
+Mantenha `PORTAL_TRANSPARENCIA_TIMEOUT_SECONDS`,
+`PORTAL_TRANSPARENCIA_MAX_RETRIES` e `PORTAL_TRANSPARENCIA_MAX_PAGES` dentro dos
+limites operacionais. Respeite o rate limit publicado; 429 e 5xx sofrem retry
+limitado e, depois disso, aparecem como fonte indisponível. Não registre token,
+headers, payload ou credenciais. Os registros retornados são sanções ou
+impedimentos publicados, não dívida, certidão ou prova de regularidade fiscal.
+Homologue somente com CNPJ autorizado e fora do Git.
+
 ## Backups, retenção e auditoria
 
 Faça backup criptografado e testado de:

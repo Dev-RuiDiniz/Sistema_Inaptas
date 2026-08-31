@@ -169,4 +169,11 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 - Preservar o histórico cronológico; correções de estado devem explicar a mudança em vez de apagar a decisão anterior.
 - Manter detalhes funcionais na spec-mãe e detalhes de implementação nas specs históricas ou documentos técnicos correspondentes.
 - Nunca armazenar tokens, certificados, CNPJ real, dados fiscais ou credenciais.
+
+### 31/08/2026 — integração do Portal da Transparência
+
+- O escopo foi aprovado explicitamente nesta conversa e formalizado em `specs/2026-08-31-integracao-portal-transparencia.md`, com transição `APROVADA → EM_IMPLEMENTAÇÃO → EM_HOMOLOGAÇÃO`.
+- Foi criado o `PortalTransparenciaProvider`, com consultas paralelas a CEIS, CNEP e CEPIM, header `chave-api-dados`, paginação limitada, retry controlado e estados seguros para falhas.
+- O contrato canônico recebeu `ComplianceData` e registros normalizados. A rota própria, os dois `full-check`, o painel e os relatórios exibem evidências sem payload bruto.
+- O provider permanece desabilitado por padrão e não possui fallback. Token, CNPJ real, payload e credencial não foram adicionados; homologação externa aguarda token, ambiente e CNPJ autorizado.
 - Toda alteração relevante nesta memória deve ter commit individual em Português-BR.

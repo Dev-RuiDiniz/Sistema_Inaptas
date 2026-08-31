@@ -21,14 +21,14 @@
 
 ## Tarefas
 
-- [ ] Criar contrato `ComplianceProvider`, resultado de provider, `ComplianceData` e `SanctionRecord`.
-- [ ] Adicionar `POST /v1/company/compliance` e incluir compliance nos dois fluxos `full-check`.
-- [ ] Implementar `PortalTransparenciaProvider` com autenticação, paralelismo, paginação, retry e estados seguros.
-- [ ] Adicionar configuração, validação e seleção explícita com provider desabilitado por padrão.
-- [ ] Atualizar painel, PDF e CSV com registros normalizados e status de fonte.
-- [ ] Criar testes unitários, de rota, configuração, painel e relatórios.
-- [ ] Atualizar documentação operacional, `ROADMAP.md`, `MEMORY.md` e índice de specs.
-- [ ] Executar validações obrigatórias e registrar limitações de homologação Docker/token.
+- [x] Criar contrato `ComplianceProvider`, resultado de provider, `ComplianceData` e `SanctionRecord`.
+- [x] Adicionar `POST /v1/company/compliance` e incluir compliance nos dois fluxos `full-check`.
+- [x] Implementar `PortalTransparenciaProvider` com autenticação, paralelismo, paginação, retry e estados seguros.
+- [x] Adicionar configuração, validação e seleção explícita com provider desabilitado por padrão.
+- [x] Atualizar painel, PDF e CSV com registros normalizados e status de fonte.
+- [x] Criar testes unitários, de rota, configuração, painel e relatórios.
+- [x] Atualizar documentação operacional, `ROADMAP.md`, `MEMORY.md` e índice de specs.
+- [x] Executar validações obrigatórias e registrar limitações de homologação Docker/token.
 
 ## Commits
 

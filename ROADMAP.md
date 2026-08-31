@@ -114,6 +114,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | `TASK-MVP-005` | Atualizar visão comercial | `README.md` | `[x]` concluída | `f7d8dc0` |
 | `TASK-MVP-006` | Validar documentação e publicar | evidências, validações e `origin/main` | `[x]` validação concluída; publicação na etapa de integração | `docs: registrar validação documental do mvp` |
 | `TASK-MINHA-RECEITA-001` | Integrar provider cadastral Minha Receita | provider, seleção, Compose, carga e documentação | `[x]` implementação técnica concluída; homologação externa pendente | branch `funcionalidade/minha-receita` |
+| `TASK-PORTAL-TRANSPARENCIA-001` | Integrar compliance do Portal da Transparência | CEIS/CNEP/CEPIM, rota, full-check, painel, relatórios e operação | `[-]` implementação técnica concluída; em homologação externa | branch `funcionalidade/portal-transparencia` |
 
 ## Marco 0 — Governança e base SDD
 
@@ -267,6 +268,20 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 ## Regra de manutenção
 
 - Atualizar este roadmap ao criar, iniciar, concluir, bloquear ou cancelar uma tarefa.
+
+### Integracao do Portal da Transparencia
+
+**Spec:** [`specs/2026-08-31-integracao-portal-transparencia.md`](specs/2026-08-31-integracao-portal-transparencia.md)
+
+**Estado:** `EM_HOMOLOGACAO` — implementacao tecnica concluida; homologacao
+externa depende de token, ambiente HTTPS/Docker/VPS e CNPJ autorizado.
+
+O provider separado `portal_transparencia` consulta exclusivamente CEIS, CNEP e
+CEPIM por CNPJ. O resultado normalizado aparece em
+`POST /v1/company/compliance` e nos dois fluxos `full-check`, no painel e nos
+relatorios. O provider e `disabled` por padrao, nao usa fallback e nunca
+transforma ausencia de registros ou indisponibilidade em regularidade fiscal.
+DadosAPI e Confere CNPJ permanecem como integracoes futuras independentes.
 - Cada tarefa deve apontar para arquivo, critério de aceite, evidência e commit individual.
 - Atualizar `MEMORY.md` junto com decisões, riscos, dependências, validações e homologações relevantes.
 - Separar sempre implementação técnica concluída, homologação externa pendente e produção bloqueada.
