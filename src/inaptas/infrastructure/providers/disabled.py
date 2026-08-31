@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from inaptas.domain.models import (
+    ComplianceProviderResult,
     FiscalStatusProviderResult,
     PgfnProviderResult,
     ProviderStatus,
@@ -24,6 +25,18 @@ class DisabledFiscalStatusProvider:
 
     async def consultar(self, cnpj: str) -> FiscalStatusProviderResult:
         return FiscalStatusProviderResult(
+            provider=self.nome,
+            status=ProviderStatus.DISABLED,
+            source_data={},
+            error_code="provider_disabled",
+        )
+
+
+class DisabledComplianceProvider:
+    nome = "PORTAL_TRANSPARENCIA"
+
+    async def consultar(self, cnpj: str) -> ComplianceProviderResult:
+        return ComplianceProviderResult(
             provider=self.nome,
             status=ProviderStatus.DISABLED,
             source_data={},

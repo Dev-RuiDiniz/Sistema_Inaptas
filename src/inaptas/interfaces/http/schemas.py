@@ -45,6 +45,29 @@ class PgfnData(ModeloBase):
     debts: list[dict[str, Any]] = Field(default_factory=list)
 
 
+class SanctionRecord(ModeloBase):
+    dataset: str
+    id: int
+    reference_date: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    publication_date: str | None = None
+    sanction_type: str | None = None
+    sanctioned_name: str | None = None
+    sanctioned_document: str | None = None
+    authority_name: str | None = None
+    authority_uf: str | None = None
+    process_number: str | None = None
+    publication_url: str | None = None
+    fine_amount: str | None = None
+    reason: str | None = None
+
+
+class ComplianceData(ModeloBase):
+    sanctions_found: bool | None = None
+    records: list[SanctionRecord] = Field(default_factory=list)
+
+
 class ProviderSource(ModeloBase):
     provider: str
     status: ProviderStatus
@@ -62,6 +85,7 @@ class FiscalResponse(ModeloBase):
     company: CompanyData = Field(default_factory=CompanyData)
     tax: TaxData = Field(default_factory=TaxData)
     pgfn: PgfnData = Field(default_factory=PgfnData)
+    compliance: ComplianceData = Field(default_factory=ComplianceData)
     sources: list[ProviderSource] = Field(default_factory=list)
     system_diagnosis: SystemDiagnosisModel = Field(default_factory=SystemDiagnosisModel)
     ai_interpretation: str | None = None

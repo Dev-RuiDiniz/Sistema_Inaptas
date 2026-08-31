@@ -2,16 +2,24 @@ from __future__ import annotations
 
 from typing import Any
 
-from inaptas.application.ports import CadastroProvider, FiscalStatusProvider, PgfnProvider
+from inaptas.application.ports import (
+    CadastroProvider,
+    ComplianceProvider,
+    FiscalStatusProvider,
+    PgfnProvider,
+)
 from inaptas.domain.cnpj import normalizar_cnpj
 from inaptas.domain.diagnosis import construir_diagnostico
 from inaptas.domain.models import (
     CadastroProviderResult,
+    ComplianceProviderResult,
     FiscalStatusProviderResult,
     PgfnProviderResult,
+    ProviderStatus,
 )
 from inaptas.interfaces.http.schemas import (
     CompanyData,
+    ComplianceData,
     FiscalResponse,
     PgfnData,
     ProviderSource,
@@ -34,13 +42,19 @@ def _resposta_canonica(
     cadastro: CadastroProviderResult | None = None,
     fiscal: FiscalStatusProviderResult | None = None,
     pgfn: PgfnProviderResult | None = None,
+    compliance: ComplianceProviderResult | None = None,
 ) -> FiscalResponse:
     cadastro_data = cadastro.source_data if cadastro and cadastro.status.value == "ok" else {}
     fiscal_data = fiscal.source_data if fiscal and fiscal.status.value == "ok" else {}
     pgfn_data = pgfn.source_data if pgfn and pgfn.status.value == "ok" else {}
+    compliance_data = (
+        compliance.source_data if compliance and compliance.status.value == "ok" else {}
+    )
     diagnostico = construir_diagnostico(cadastro, pgfn)
 
-    resultados = [resultado for resultado in (cadastro, fiscal, pgfn) if resultado is not None]
+    resultados = [
+        resultado for resultado in (cadastro, fiscal, pgfn, compliance) if resultado is not None
+    ]
     return FiscalResponse(
         cnpj=cnpj,
         company=CompanyData(
@@ -60,6 +74,10 @@ def _resposta_canonica(
             has_active_debt=pgfn_data.get("has_active_debt"),
             debts=pgfn_data.get("debts", []),
         ),
+        compliance=ComplianceData(
+            sanctions_found=compliance_data.get("sanctions_found"),
+            records=compliance_data.get("records", []),
+        ),
         sources=[_fonte(resultado) for resultado in resultados],
         system_diagnosis=SystemDiagnosisModel(
             registration=diagnostico.registration,
@@ -74,10 +92,12 @@ class FiscalGatewayService:
         cadastro_provider: CadastroProvider,
         pgfn_provider: PgfnProvider,
         fiscal_status_provider: FiscalStatusProvider,
+        compliance_provider: ComplianceProvider | None = None,
     ) -> None:
         self.cadastro_provider = cadastro_provider
         self.pgfn_provider = pgfn_provider
         self.fiscal_status_provider = fiscal_status_provider
+        self.compliance_provider = compliance_provider
 
     async def consultar_cadastro(self, cnpj: str) -> FiscalResponse:
         cnpj_normalizado = normalizar_cnpj(cnpj)
@@ -94,9 +114,27 @@ class FiscalGatewayService:
         fiscal = await self.fiscal_status_provider.consultar(cnpj_normalizado)
         return _resposta_canonica(cnpj_normalizado, fiscal=fiscal)
 
+    async def consultar_compliance(self, cnpj: str) -> FiscalResponse:
+        cnpj_normalizado = normalizar_cnpj(cnpj)
+        if self.compliance_provider is None:
+            compliance = ComplianceProviderResult(
+                provider="COMPLIANCE",
+                status=ProviderStatus.DISABLED,
+                source_data={},
+                error_code="provider_disabled",
+            )
+        else:
+            compliance = await self.compliance_provider.consultar(cnpj_normalizado)
+        return _resposta_canonica(cnpj_normalizado, compliance=compliance)
+
     async def consulta_completa(self, cnpj: str) -> FiscalResponse:
         cnpj_normalizado = normalizar_cnpj(cnpj)
         cadastro = await self.cadastro_provider.consultar(cnpj_normalizado)
         fiscal = await self.fiscal_status_provider.consultar(cnpj_normalizado)
         pgfn = await self.pgfn_provider.consultar(cnpj_normalizado)
-        return _resposta_canonica(cnpj_normalizado, cadastro, fiscal, pgfn)
+        compliance = (
+            await self.compliance_provider.consultar(cnpj_normalizado)
+            if self.compliance_provider is not None
+            else None
+        )
+        return _resposta_canonica(cnpj_normalizado, cadastro, fiscal, pgfn, compliance)

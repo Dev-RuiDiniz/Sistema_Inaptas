@@ -27,6 +27,9 @@ class ServicoFalso:
     async def consultar_pgfn(self, cnpj: str) -> FiscalResponse:
         return self.resposta.model_copy(update={"cnpj": cnpj})
 
+    async def consultar_compliance(self, cnpj: str) -> FiscalResponse:
+        return self.resposta.model_copy(update={"cnpj": cnpj})
+
     async def consulta_completa(self, cnpj: str) -> FiscalResponse:
         return self.resposta.model_copy(update={"cnpj": cnpj})
 
@@ -100,6 +103,17 @@ def test_lookup_autenticado_devolve_resposta_canonica() -> None:
     assert resposta.status_code == 200
     assert resposta.headers["X-Correlation-ID"] == "correlacao-teste"
     assert resposta.json()["cnpj"] == "11222333000181"
+
+
+def test_rota_de_compliance_exige_autenticacao_e_devolve_contrato() -> None:
+    resposta = _cliente().post(
+        "/v1/company/compliance",
+        headers={"Authorization": "Bearer token-teste"},
+        json={"cnpj": "11222333000181"},
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["compliance"]["records"] == []
 
 
 def test_lookup_autenticado_aceita_cnpj_alfanumerico() -> None:

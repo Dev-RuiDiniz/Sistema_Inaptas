@@ -35,3 +35,8 @@ class PgfnProviderResult(ProviderResult):
 @dataclass(frozen=True)
 class FiscalStatusProviderResult(ProviderResult):
     pass
+
+
+@dataclass(frozen=True)
+class ComplianceProviderResult(ProviderResult):
+    pass

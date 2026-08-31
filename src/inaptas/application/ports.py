@@ -4,6 +4,7 @@ from typing import Protocol
 
 from inaptas.domain.models import (
     CadastroProviderResult,
+    ComplianceProviderResult,
     FiscalStatusProviderResult,
     PgfnProviderResult,
 )
@@ -27,4 +28,11 @@ class FiscalStatusProvider(Protocol):
     nome: str
 
     async def consultar(self, cnpj: str) -> FiscalStatusProviderResult:
+        ...
+
+
+class ComplianceProvider(Protocol):
+    nome: str
+
+    async def consultar(self, cnpj: str) -> ComplianceProviderResult:
         ...

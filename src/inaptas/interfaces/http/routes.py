@@ -70,6 +70,17 @@ def criar_router() -> APIRouter:
         return await servico.consultar_pgfn(payload.cnpj)
 
     @router.post(
+        "/v1/company/compliance",
+        response_model=FiscalResponse,
+        dependencies=[Depends(exigir_token_interno), Depends(exigir_rate_limit)],
+    )
+    async def compliance(
+        payload: CompanyLookupRequest,
+        servico: Annotated[FiscalGatewayService, Depends(obter_servico)],
+    ) -> FiscalResponse:
+        return await servico.consultar_compliance(payload.cnpj)
+
+    @router.post(
         "/v1/company/full-check",
         response_model=FiscalResponse,
         dependencies=[Depends(exigir_token_interno), Depends(exigir_rate_limit)],
