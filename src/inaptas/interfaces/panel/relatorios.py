@@ -15,16 +15,46 @@ def _linhas(consulta: Consultation, resposta: FiscalResponse) -> list[tuple[str,
         f"{fonte.provider}: {fonte.status} ({fonte.latency_ms or '—'} ms)"
         for fonte in resposta.sources
     )
-    return [
+    if resposta.compliance.sanctions_found is True:
+        resumo_compliance = f"{len(resposta.compliance.records)} registros encontrados"
+    elif resposta.compliance.sanctions_found is False:
+        resumo_compliance = "Nenhum registro localizado"
+    else:
+        resumo_compliance = "Fonte indisponível ou consulta inconclusiva"
+    linhas = [
         ("CNPJ", resposta.cnpj),
         ("Razão social", resposta.company.legal_name or "Não informado"),
         ("Situação cadastral", resposta.company.registration_status or "Não informado"),
         ("Motivo cadastral", resposta.company.registration_status_reason or "Não informado"),
         ("Diagnóstico cadastral", resposta.system_diagnosis.registration),
         ("Diagnóstico PGFN", resposta.system_diagnosis.pgfn),
+        ("Registros de compliance", resumo_compliance),
         ("Fontes", fontes or "Nenhuma fonte registrada"),
         ("Consultada em", str(consulta.completed_at or consulta.requested_at)),
     ]
+    campos = (
+        ("dataset", "Dataset"),
+        ("id", "ID"),
+        ("reference_date", "Data de referência"),
+        ("start_date", "Início"),
+        ("end_date", "Fim"),
+        ("publication_date", "Publicação"),
+        ("sanction_type", "Tipo de sanção"),
+        ("sanctioned_name", "Nome sancionado"),
+        ("sanctioned_document", "Documento sancionado"),
+        ("authority_name", "Órgão sancionador"),
+        ("authority_uf", "UF do órgão"),
+        ("process_number", "Processo"),
+        ("publication_url", "Publicação oficial"),
+        ("fine_amount", "Valor da multa"),
+        ("reason", "Motivo"),
+    )
+    for indice, registro in enumerate(resposta.compliance.records, start=1):
+        for campo, rotulo in campos:
+            valor = getattr(registro, campo)
+            if valor is not None:
+                linhas.append((f"Registro {indice} — {rotulo}", str(valor)))
+    return linhas
 
 
 def gerar_csv(consulta: Consultation, resposta: FiscalResponse) -> bytes:

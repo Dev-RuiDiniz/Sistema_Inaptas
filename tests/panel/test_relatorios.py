@@ -2,7 +2,12 @@ from datetime import UTC, datetime
 
 from inaptas.domain.models import ProviderStatus
 from inaptas.infrastructure.persistence.models import Consultation
-from inaptas.interfaces.http.schemas import FiscalResponse, ProviderSource
+from inaptas.interfaces.http.schemas import (
+    ComplianceData,
+    FiscalResponse,
+    ProviderSource,
+    SanctionRecord,
+)
 from inaptas.interfaces.panel.relatorios import gerar_csv, gerar_pdf
 
 
@@ -36,3 +41,28 @@ def test_pdf_e_gerado_sem_segredos() -> None:
     arquivo = gerar_pdf(consulta, resposta)
     assert arquivo.startswith(b"%PDF")
     assert b"segredo" not in arquivo.lower()
+
+
+def test_relatorios_incluem_resumo_e_registro_normalizado() -> None:
+    consulta, resposta = _dados()
+    resposta.compliance = ComplianceData(
+        sanctions_found=True,
+        records=[
+            SanctionRecord(
+                dataset="CEIS",
+                id=7,
+                sanction_type="Impedimento",
+                authority_name="Órgão Teste",
+                process_number="PROC-7",
+                publication_url="https://exemplo.test/7",
+            )
+        ],
+    )
+
+    arquivo = gerar_csv(consulta, resposta).decode("utf-8-sig")
+
+    assert "registros encontrados" in arquivo
+    assert "Registro 1 — Dataset" in arquivo
+    assert "CEIS" in arquivo
+    assert "PROC-7" in arquivo
+    assert "https://exemplo.test/7" in arquivo

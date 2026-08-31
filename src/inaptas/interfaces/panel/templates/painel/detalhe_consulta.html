@@ -1,3 +1,34 @@
 {% extends "painel/base.html" %}
 {% block title %}Consulta {{ consulta.cnpj }} — Sistema Inaptas{% endblock %}
-{% block body %}<main class="app-shell"><header class="topbar"><a class="brand" href="/painel">Sistema Inaptas</a><a href="/painel/consultas">Histórico</a></header><section class="content"><p class="eyebrow">Evidência da consulta</p><h1>{{ consulta.cnpj }}</h1><div class="metric-row"><div class="metric"><span>Diagnóstico cadastral</span><strong>{{ resposta.system_diagnosis.registration }}</strong></div><div class="metric"><span>PGFN</span><strong>{{ resposta.system_diagnosis.pgfn }}</strong></div></div><section class="panel"><h2>Dados cadastrais</h2><dl class="detail-list"><dt>Razão social</dt><dd>{{ resposta.company.legal_name or "Não informado" }}</dd><dt>Situação</dt><dd>{{ resposta.company.registration_status or "Não informado" }}</dd><dt>Motivo</dt><dd>{{ resposta.company.registration_status_reason or "Não informado" }}</dd></dl></section><section class="panel"><h2>Fontes e latência</h2><table><thead><tr><th>Fonte</th><th>Status</th><th>Latência</th><th>Erro</th></tr></thead><tbody>{% for fonte in resposta.sources %}<tr><td>{{ fonte.provider }}</td><td>{{ fonte.status }}</td><td>{{ fonte.latency_ms or "—" }} ms</td><td>{{ fonte.error_code or "—" }}</td></tr>{% endfor %}</tbody></table></section><p><a href="/painel/consultas/{{ consulta.id }}/relatorio.pdf">Baixar PDF</a> · <a href="/painel/consultas/{{ consulta.id }}/relatorio.csv">Baixar CSV</a></p></section></main>{% endblock %}
+{% block body %}
+<main class="app-shell">
+  <header class="topbar"><a class="brand" href="/painel">Sistema Inaptas</a><a href="/painel/consultas">Histórico</a></header>
+  <section class="content">
+    <p class="eyebrow">Evidência da consulta</p>
+    <h1>{{ consulta.cnpj }}</h1>
+    <div class="metric-row">
+      <div class="metric"><span>Diagnóstico cadastral</span><strong>{{ resposta.system_diagnosis.registration }}</strong></div>
+      <div class="metric"><span>PGFN</span><strong>{{ resposta.system_diagnosis.pgfn }}</strong></div>
+      <div class="metric"><span>Compliance</span><strong>{% if resposta.compliance.sanctions_found is true %}{{ resposta.compliance.records|length }} registros encontrados{% elif resposta.compliance.sanctions_found is false %}Nenhum registro localizado{% else %}Fonte indisponível{% endif %}</strong></div>
+    </div>
+    <section class="panel">
+      <h2>Dados cadastrais</h2>
+      <dl class="detail-list"><dt>Razão social</dt><dd>{{ resposta.company.legal_name or "Não informado" }}</dd><dt>Situação</dt><dd>{{ resposta.company.registration_status or "Não informado" }}</dd><dt>Motivo</dt><dd>{{ resposta.company.registration_status_reason or "Não informado" }}</dd></dl>
+    </section>
+    <section class="panel">
+      <h2>Registros de compliance</h2>
+      {% if resposta.compliance.sanctions_found is none %}<p>Fonte indisponível ou consulta inconclusiva. A resposta não permite concluir ausência de sanções.</p>
+      {% elif resposta.compliance.records %}
+      <table><thead><tr><th>Dataset</th><th>Tipo</th><th>Datas</th><th>Órgão</th><th>Processo</th><th>Publicação</th></tr></thead><tbody>
+        {% for registro in resposta.compliance.records %}<tr><td>{{ registro.dataset }}</td><td>{{ registro.sanction_type or "Não informado" }}</td><td>{{ registro.start_date or "—" }}{% if registro.end_date %} a {{ registro.end_date }}{% endif %}</td><td>{{ registro.authority_name or "Não informado" }}{% if registro.authority_uf %} ({{ registro.authority_uf }}){% endif %}</td><td>{{ registro.process_number or "Não informado" }}</td><td>{% if registro.publication_url %}<a href="{{ registro.publication_url }}" rel="noreferrer">Link oficial</a>{% else %}Não informado{% endif %}</td></tr>{% endfor %}
+      </tbody></table>
+      {% else %}<p>Nenhum registro localizado nos datasets consultados.</p>{% endif %}
+    </section>
+    <section class="panel">
+      <h2>Fontes e latência</h2>
+      <table><thead><tr><th>Fonte</th><th>Status</th><th>Latência</th><th>Erro</th></tr></thead><tbody>{% for fonte in resposta.sources %}<tr><td>{{ fonte.provider }}</td><td>{{ fonte.status }}</td><td>{{ fonte.latency_ms or "—" }} ms</td><td>{{ fonte.error_code or "—" }}</td></tr>{% endfor %}</tbody></table>
+    </section>
+    <p><a href="/painel/consultas/{{ consulta.id }}/relatorio.pdf">Baixar PDF</a> · <a href="/painel/consultas/{{ consulta.id }}/relatorio.csv">Baixar CSV</a></p>
+  </section>
+</main>
+{% endblock %}
