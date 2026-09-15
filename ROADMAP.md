@@ -25,13 +25,13 @@ O MVP operacional é composto por:
 
 Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-especificacao-mae.md) e [`MEMORY.md`](MEMORY.md).
 
-## Estado real em 31/08/2026
+## Estado real em 15/09/2026
 
 | Dimensão | Estado | Evidência ou bloqueio |
 |---|---|---|
 | Implementação técnica do gateway e painel | `CONCLUÍDA` tecnicamente | Código na branch atual e testes automatizados. |
-| Validação automatizada | `CONCLUÍDA` | 88 testes aprovados, 1 integração pulada por Docker indisponível; Ruff, MyPy, Alembic e scanner aprovados. |
-| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | Gateway, PostgreSQL e Redis saudáveis; pull do stack n8n/Ollama excedeu o limite local. |
+| Validação automatizada | `CONCLUÍDA` | 110 testes aprovados, 1 integração pulada e 2 avisos; Ruff, MyPy, Alembic e scanner aprovados. |
+| Integração Docker/PostgreSQL/Redis | `EM_HOMOLOGAÇÃO` | Docker não está instalado no ambiente desta auditoria; Compose e dependências reais aguardam execução. |
 | Homologação Meta/WhatsApp, n8n e Ollama | Pendente externo | Domínios, VPS, contas, números, modelo e credenciais do contratante. |
 | Homologação OIDC do painel | Pendente externo | Issuer, client, callback, grupos e Redis do cliente. |
 | Homologação ReceitaWS | Pendente externo | Contratação, limites e CNPJ de teste autorizado. |
@@ -115,6 +115,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | `TASK-MVP-006` | Validar documentação e publicar | evidências, validações e `origin/main` | `[x]` validação concluída; publicação na etapa de integração | `docs: registrar validação documental do mvp` |
 | `TASK-MINHA-RECEITA-001` | Integrar provider cadastral Minha Receita | provider, seleção, Compose, carga e documentação | `[x]` implementação técnica concluída; homologação externa pendente | branch `funcionalidade/minha-receita` |
 | `TASK-PORTAL-TRANSPARENCIA-001` | Integrar compliance do Portal da Transparência | CEIS/CNEP/CEPIM, rota, full-check, painel, relatórios e operação | `[-]` implementação técnica concluída; em homologação externa | branch `funcionalidade/portal-transparencia` |
+| `TASK-AUDITORIA-ESTADO-REAL` | Auditar e registrar o estado real do projeto | `RELATORIO_AUDITORIA_ESTADO_REAL.md`, README, roadmap e memória | `[x]` concluída em 15/09/2026 | commit desta auditoria |
 
 ## Marco 0 — Governança e base SDD
 
@@ -161,7 +162,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 - [x] Executar Gateway, PostgreSQL e Redis reais — containers saudáveis e `/health` respondendo `200`.
 - [!] Executar stack completo n8n/Ollama/Caddy — registry local não concluiu o pull das imagens.
 
-**Evidências:** `python -m pytest -q` com 73 aprovados e 1 integração pulada; Ruff, MyPy, Alembic, scanner e `docker compose config --quiet` aprovados.
+**Evidências históricas:** `python -m pytest -q` com 73 aprovados e 1 integração pulada; Ruff, MyPy, Alembic, scanner e `docker compose config --quiet` foram aprovados naquele ambiente. A auditoria de 15/09/2026 não executou Docker porque o comando não está instalado.
 
 ## Fase 1 — MVP público e painel operacional
 
@@ -182,6 +183,12 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 - [!] Login contra OIDC real e PostgreSQL/Redis reais — depende de credenciais e Docker.
 
 **Critérios de aceite:** CNPJ válido produz contrato canônico; inválido é rejeitado; formato alfanumérico é aceito; indisponibilidade permanece explícita; webhook duplicado não duplica consulta; secrets não aparecem no frontend, n8n, Ollama ou logs; painel aplica RBAC e isolamento; relatórios preservam fonte, status e diagnóstico.
+
+### Auditoria de estado real — 15/09/2026
+
+**Estado:** `CONCLUÍDA` para o escopo documental; homologação externa e produção continuam bloqueadas.
+
+O relatório [`RELATORIO_AUDITORIA_ESTADO_REAL.md`](RELATORIO_AUDITORIA_ESTADO_REAL.md) registra o funcionamento atual, as 26 rotas de negócio, o catálogo de funções, providers, persistência, integrações, controles de segurança, limitações e próximos passos. A validação atual resultou em 110 testes aprovados, 1 integração pulada, Ruff/MyPy/Alembic/scanner aprovados e Docker indisponível no ambiente.
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 

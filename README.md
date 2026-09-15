@@ -76,9 +76,9 @@ APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, n8n, Ollama/
 
 ## Status atual
 
-O gateway e o painel estão implementados tecnicamente. Na execução local de 22/08/2026, foram observados **73 testes aprovados e 1 integração pulada**. Ruff, MyPy, Alembic, scanner de segurança e validação sintática do Compose passaram. O Swagger recebeu uma correção de CSP e aguarda confirmação visual no navegador. O pull das imagens n8n/Ollama ainda depende da disponibilidade do registry local.
+O gateway e o painel estão implementados tecnicamente. Na auditoria de 15/09/2026, a suíte apresentou **110 testes aprovados, 1 integração pulada e 2 avisos**. Ruff, MyPy, Alembic e scanner de segurança passaram. O Docker não está instalado no ambiente auditado; por isso, o Compose, PostgreSQL/Redis reais e o fluxo ponta a ponta não foram homologados nesta execução.
 
-A produção continua bloqueada até a validação do Docker, OIDC real, Meta/WhatsApp, n8n/Ollama, providers contratados e uma POC com CNPJ real autorizado. Nenhuma credencial ou dado fiscal real é armazenado neste repositório.
+A produção continua bloqueada até a validação da infraestrutura, OIDC real, Meta/WhatsApp, n8n/Ollama, providers contratados, auditoria/retenção operacional e uma POC com CNPJ real autorizado. PGFN e SITFIS ainda estão representados por providers desabilitados, e o workflow n8n permanece inativo. Nenhuma credencial ou dado fiscal real é armazenado neste repositório.
 
 ## Documentação do projeto
 
@@ -94,6 +94,7 @@ A produção continua bloqueada até a validação do Docker, OIDC real, Meta/Wh
 - [Integração do Portal da Transparência](specs/2026-08-31-integracao-portal-transparencia.md)
 - [Escopo técnico de origem](escopo_tecnico_inaptas_regularizabr_atualizado.md)
 - [Plano de consolidação documental](docs/superpowers/plans/2026-08-21-consolidacao-mvp-documental.md)
+- [Relatório de auditoria e estado real](RELATORIO_AUDITORIA_ESTADO_REAL.md)
 
 ## Execução local
 

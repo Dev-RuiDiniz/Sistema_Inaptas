@@ -4,12 +4,12 @@
 
 ## Estado atual
 
-- **Data da última atualização:** 31/08/2026.
+- **Data da última atualização:** 15/09/2026.
 - **Produto:** Inaptas.
 - **Direção futura:** Regulariza.br modular.
 - **Fase:** implementação técnica do MVP público e painel concluída; homologação externa e produção aguardam dependências.
-- **Branch atual:** `funcionalidade/minha-receita`.
-- **Estado da branch na descoberta:** 9 commits além de `main`; após os seis commits documentais de plano, specs, governança, acompanhamento e README, 15 commits além de `main`.
+- **Branch atual:** `main`.
+- **Estado da branch na auditoria:** `main` alinhada a `origin/main` no commit `2391a4c` antes da documentação desta tarefa.
 - **Remoto de publicação:** `origin`, com destino final `origin/main`.
 - **Fonte macro:** `PRD.md`.
 - **Fonte operacional consolidada:** `specs/2026-08-21-mvp-inaptas-especificacao-mae.md`, inicialmente em `DRAFT`.
@@ -21,8 +21,8 @@
 - Fluxos de WhatsApp/n8n, providers cadastrais/fiscais e painel operacional preparados sem credenciais reais.
 - Painel faz parte do MVP operacional: OIDC, sessão server-side/Redis, RBAC, consultas manuais, histórico, relatórios PDF/CSV, dashboard, usuários, retenção e auditoria.
 - PostgreSQL, Redis, migrations, Compose, healthcheck, cache, rate limit, idempotência, logs redigidos e segurança estão preparados.
-- Validação desta tarefa: **88 testes aprovados**, **1 teste de integração pulado por Docker indisponível**, Ruff aprovado, MyPy aprovado, Alembic aprovado, scanner de segurança aprovado e `docker compose config --quiet` aprovado.
-- Docker/Compose, OIDC real e POC com CNPJ real autorizado ainda não foram homologados neste ambiente.
+- Validação da auditoria de 15/09/2026: **110 testes aprovados**, **1 teste de integração pulado**, 2 avisos, Ruff aprovado, MyPy aprovado, Alembic aprovado e scanner de segurança aprovado.
+- Docker não está instalado no ambiente atual; Docker/Compose, OIDC real e POC com CNPJ real autorizado ainda não foram homologados.
 
 ## Decisões confirmadas
 
@@ -70,7 +70,7 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 - `src/inaptas/infrastructure/persistence`: SQLAlchemy, repositórios e Alembic.
 - `src/inaptas/infrastructure/cache`: Redis, cache, rate limit, sessão e idempotência.
 - `src/inaptas/infrastructure/integrations`: n8n, Ollama, WhatsApp e webhook Meta.
-- `tests/`: 66 testes aprovados; a integração com Compose é opcional e há 1 teste pulado quando Docker não está disponível.
+- `tests/`: 110 testes aprovados na auditoria atual; a integração com Compose é opcional e houve 1 teste pulado porque o Docker não está disponível.
 - `scripts/validar-local.ps1`: inicia Compose e executa smoke tests locais sem imprimir secrets.
 - `scripts/verificar-seguranca.ps1`: verifica padrões de credenciais somente em arquivos versionados.
 
@@ -100,10 +100,10 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 
 ## Próximos passos
 
-1. Integrar a branch atual na `main` preservando commits e publicar somente em `origin/main`.
-2. Disponibilizar Docker para executar Compose e o teste de integração.
-3. Completar Fase 0 com responsáveis, titularidade, contratos, credenciais fora do Git e CNPJ autorizado.
-4. Homologar Meta/WhatsApp, n8n, Ollama, ReceitaWS, OIDC, SERPRO e PGFN conforme escopo e autorizações.
+1. Disponibilizar Docker para executar Compose e o teste de integração.
+2. Completar Fase 0 com responsáveis, titularidade, contratos, credenciais fora do Git e CNPJ autorizado.
+3. Homologar Meta/WhatsApp, n8n, Ollama, ReceitaWS, OIDC, SERPRO e PGFN conforme escopo e autorizações.
+4. Integrar auditoria por provider, rotina automática de retenção e preservação segura de evidências.
 5. Atualizar os estados para `CONCLUÍDA` somente após evidência externa e DoD completo.
 
 ## Histórico cronológico append-only
@@ -177,3 +177,11 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 - O contrato canônico recebeu `ComplianceData` e registros normalizados. A rota própria, os dois `full-check`, o painel e os relatórios exibem evidências sem payload bruto.
 - O provider permanece desabilitado por padrão e não possui fallback. Token, CNPJ real, payload e credencial não foram adicionados; homologação externa aguarda token, ambiente e CNPJ autorizado.
 - Toda alteração relevante nesta memória deve ter commit individual em Português-BR.
+
+### 15/09/2026 — auditoria do estado real
+
+- O repositório foi auditado na `main`, alinhada a `origin/main` no commit `2391a4c` antes desta documentação.
+- Foi criado `RELATORIO_AUDITORIA_ESTADO_REAL.md` na raiz com visão comercial, funcionamento, rotas, funções, providers, persistência, integrações, segurança, testes, riscos e próximos passos.
+- A suíte atual passou com 110 testes; 1 módulo de integração foi pulado por depender do Docker, que não está instalado neste ambiente. Ruff, MyPy, Alembic e scanner de segurança passaram.
+- A auditoria confirmou que PGFN/SITFIS ainda são providers desabilitados, o workflow n8n está inativo, a auditoria de provider não está ligada ao fluxo HTTP/webhook e a limpeza de retenção não possui agendamento automático.
+- O README e o roadmap foram alinhados ao resultado atual. Nenhum código, secret, credencial, CNPJ real ou comportamento de produção foi alterado.
