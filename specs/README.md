@@ -10,6 +10,7 @@ Esta pasta organiza a documentação operacional do MVP público e do painel ope
 | [`2026-08-22-migracao-n8n-vps.md`](2026-08-22-migracao-n8n-vps.md) | Migração de orquestração para n8n self-hosted e Ollama em VPS | `EM_IMPLEMENTAÇÃO` |
 | [`2026-08-31-integracao-minha-receita.md`](2026-08-31-integracao-minha-receita.md) | Provider cadastral self-hosted Minha Receita | `EM_HOMOLOGAÇÃO` |
 | [`2026-08-31-integracao-portal-transparencia.md`](2026-08-31-integracao-portal-transparencia.md) | Provider separado de compliance CEIS/CNEP/CEPIM | `EM_HOMOLOGAÇÃO` |
+| [`2026-09-22-integracao-serpro-divida-ativa-trial.md`](2026-09-22-integracao-serpro-divida-ativa-trial.md) | Provider SERPRO Dívida Ativa no ambiente trial | `EM_HOMOLOGAÇÃO` |
 
 A spec-mãe deve ser atualizada quando houver mudança de escopo, contrato, integração, regra de negócio, critério de aceite ou decisão de homologação. Uma spec histórica não substitui a referência vigente.
 
@@ -19,6 +20,7 @@ A spec-mãe deve ser atualizada quando houver mudança de escopo, contrato, inte
 
 - [`2026-08-20-arquitetura-fase1-mvp.md`](2026-08-20-arquitetura-fase1-mvp.md) — arquitetura modular do Fiscal Gateway, conectores, contrato e regras da Fase 1. `EM_HOMOLOGAÇÃO`.
 - [`2026-08-31-integracao-minha-receita.md`](2026-08-31-integracao-minha-receita.md) — integração cadastral self-hosted, seleção explícita e carga mensal. `EM_HOMOLOGAÇÃO`.
+- [`2026-09-22-integracao-serpro-divida-ativa-trial.md`](2026-09-22-integracao-serpro-divida-ativa-trial.md) — consulta trial de dívida ativa com CPF fictício temporário e evolução planejada para autenticação oficial. `EM_HOMOLOGAÇÃO`.
 
 ### Ambiente local
 

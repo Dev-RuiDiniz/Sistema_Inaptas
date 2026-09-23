@@ -81,6 +81,24 @@ vazia significa apenas que nenhum registro foi localizado nos três datasets;
 não significa ausência de dívida ou regularidade fiscal. Teste real exige CNPJ
 autorizado fora do repositório.
 
+## SERPRO Consulta Dívida Ativa trial
+
+O provider trial fica desligado por padrão. Para uma homologação autorizada,
+revogue qualquer bearer compartilhado em texto, gere um novo token e injete-o
+somente no ambiente do Gateway:
+
+```powershell
+$env:PGFN_PROVIDER="serpro_trial"
+# Defina SERPRO_DIVIDA_ATIVA_TRIAL_TOKEN pelo mecanismo de secrets da implantação.
+```
+
+Enquanto o trial aceitar somente o documento fictício, toda chamada ao
+`POST /v1/company/lookup` consultará `09781911768` no SERPRO, independentemente
+do CNPJ recebido. Portanto, a dívida retornada é evidência exclusiva do trial e
+não pode ser atribuída à empresa consultada. Cadastro e SERPRO são executados de
+forma independente; uma falha do SERPRO mantém o resultado cadastral e informa a
+fonte como inconclusiva. Para reverter, use `PGFN_PROVIDER=disabled`.
+
 ## Testes de integração
 
 ```powershell

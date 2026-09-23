@@ -185,3 +185,12 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 - A suíte atual passou com 110 testes; 1 módulo de integração foi pulado por depender do Docker, que não está instalado neste ambiente. Ruff, MyPy, Alembic e scanner de segurança passaram.
 - A auditoria confirmou que PGFN/SITFIS ainda são providers desabilitados, o workflow n8n está inativo, a auditoria de provider não está ligada ao fluxo HTTP/webhook e a limpeza de retenção não possui agendamento automático.
 - O README e o roadmap foram alinhados ao resultado atual. Nenhum código, secret, credencial, CNPJ real ou comportamento de produção foi alterado.
+
+### 22/09/2026 — especificação da integração SERPRO Dívida Ativa trial
+
+- A solicitação de integração foi formalizada em `specs/2026-09-22-integracao-serpro-divida-ativa-trial.md`, no estado `EM_REVISÃO`; nenhuma mudança de código foi iniciada antes da aprovação exigida pelo SDD.
+- O incremento proposto adiciona a consulta SERPRO ao `POST /v1/company/lookup`, usando temporariamente o CPF fictício `09781911768` para qualquer CNPJ e mantendo o provider desabilitado por padrão.
+- Foram registradas tasks futuras para remover o CPF fixo, usar o documento dinâmico, implementar OAuth2 `client_credentials` com renovação segura e homologar o endpoint oficial após a contratação.
+- O bearer compartilhado na conversa foi tratado como credencial exposta: não foi gravado no repositório e deve ser revogado/substituído antes da homologação.
+- Após aprovação explícita, a spec transitou por `APROVADA` e `EM_IMPLEMENTAÇÃO` até `EM_HOMOLOGAÇÃO`. O provider trial, a composição concorrente no `lookup`, a seleção segura por configuração e os testes foram implementados.
+- A validação em Python 3.12 resultou em 130 testes aprovados e 1 integração pulada; Ruff, MyPy e Alembic passaram. A homologação externa permanece pendente de um token trial novo injetado fora do Git.

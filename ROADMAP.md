@@ -116,6 +116,10 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | `TASK-MINHA-RECEITA-001` | Integrar provider cadastral Minha Receita | provider, seleção, Compose, carga e documentação | `[x]` implementação técnica concluída; homologação externa pendente | branch `funcionalidade/minha-receita` |
 | `TASK-PORTAL-TRANSPARENCIA-001` | Integrar compliance do Portal da Transparência | CEIS/CNEP/CEPIM, rota, full-check, painel, relatórios e operação | `[-]` implementação técnica concluída; em homologação externa | branch `funcionalidade/portal-transparencia` |
 | `TASK-AUDITORIA-ESTADO-REAL` | Auditar e registrar o estado real do projeto | `RELATORIO_AUDITORIA_ESTADO_REAL.md`, README, roadmap e memória | `[x]` concluída em 15/09/2026 | commit desta auditoria |
+| `TASK-SERPRO-001` | Integrar Consulta Dívida Ativa no ambiente trial | provider trial, `lookup`, normalização, configuração e testes | `[-]` implementação técnica concluída; homologação externa pendente | commit desta tarefa |
+| `TASK-SERPRO-002` | Remover o CPF fictício fixo e usar documento dinâmico | endpoint oficial recebendo o documento normalizado | `[!]` aguarda contrato e validação do endpoint oficial | pendente |
+| `TASK-SERPRO-003` | Implementar geração e renovação do token oficial | OAuth2 `client_credentials`, cache e renovação segura | `[!]` aguarda contrato, documentação e credenciais | pendente |
+| `TASK-SERPRO-004` | Homologar Consulta Dívida Ativa oficial | POC autorizada e evidência sanitizada | `[!]` aguarda contratação e CNPJ autorizado | pendente |
 
 ## Marco 0 — Governança e base SDD
 
@@ -194,7 +198,11 @@ O relatório [`RELATORIO_AUDITORIA_ESTADO_REAL.md`](RELATORIO_AUDITORIA_ESTADO_R
 
 **Estado:** pendente externo e de implementação condicionada.
 
-- [ ] OAuth2 `client_credentials` conforme contrato autorizado.
+**Spec em homologação:** [`specs/2026-09-22-integracao-serpro-divida-ativa-trial.md`](specs/2026-09-22-integracao-serpro-divida-ativa-trial.md). O incremento inicial usa somente o CPF fictício do trial, por configuração e sem associar sua dívida ao CNPJ consultado. A implementação e os testes locais foram concluídos; a chamada externa aguarda um token trial novo no ambiente autorizado.
+
+- [-] Integrar o ambiente trial ao `POST /v1/company/lookup` com CPF fictício fixo, provider desabilitado por padrão e token fora do Git — implementação local concluída; homologação externa pendente.
+- [ ] Remover o CPF fictício e usar documento dinâmico após contratação e validação do endpoint oficial.
+- [ ] OAuth2 `client_credentials` conforme contrato autorizado, com cache e renovação segura.
 - [ ] Consulta CNPJ oficial SERPRO conforme Swagger vigente.
 - [ ] Consulta Dívida Ativa da União da PGFN/SERPRO.
 - [ ] Renovação de token, retry controlado e respostas para 401, 403, 429 e 5xx.

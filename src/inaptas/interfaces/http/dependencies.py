@@ -6,7 +6,7 @@ from typing import Annotated, cast
 from fastapi import Header, HTTPException, Request, status
 from redis.exceptions import RedisError
 
-from inaptas.application.ports import CadastroProvider, ComplianceProvider
+from inaptas.application.ports import CadastroProvider, ComplianceProvider, PgfnProvider
 from inaptas.application.services import FiscalGatewayService
 from inaptas.config import ConfiguracaoInseguraError, Settings
 from inaptas.infrastructure.providers.disabled import (
@@ -17,6 +17,9 @@ from inaptas.infrastructure.providers.disabled import (
 from inaptas.infrastructure.providers.minha_receita import MinhaReceitaProvider
 from inaptas.infrastructure.providers.portal_transparencia import PortalTransparenciaProvider
 from inaptas.infrastructure.providers.receitaws import ReceitaWsProvider
+from inaptas.infrastructure.providers.serpro_divida_ativa import (
+    SerproDividaAtivaTrialProvider,
+)
 
 
 def criar_servico(settings: Settings) -> FiscalGatewayService:
@@ -53,9 +56,24 @@ def criar_servico(settings: Settings) -> FiscalGatewayService:
         raise ConfiguracaoInseguraError(
             "COMPLIANCE_PROVIDER deve ser disabled ou portal_transparencia"
         )
+    provedor_pgfn = settings.pgfn_provider.strip().lower()
+    pgfn_provider: PgfnProvider
+    if provedor_pgfn == "serpro_trial":
+        pgfn_provider = SerproDividaAtivaTrialProvider(
+            base_url=settings.serpro_divida_ativa_base_url,
+            api_token=settings.serpro_divida_ativa_trial_token,
+            timeout_seconds=settings.serpro_divida_ativa_timeout_seconds,
+            max_retries=settings.serpro_divida_ativa_max_retries,
+        )
+    elif provedor_pgfn == "disabled":
+        pgfn_provider = DisabledPgfnProvider()
+    else:
+        raise ConfiguracaoInseguraError(
+            "PGFN_PROVIDER deve ser disabled ou serpro_trial"
+        )
     return FiscalGatewayService(
         cadastro_provider=cadastro_provider,
-        pgfn_provider=DisabledPgfnProvider(),
+        pgfn_provider=pgfn_provider,
         fiscal_status_provider=DisabledFiscalStatusProvider(),
         compliance_provider=compliance_provider,
     )

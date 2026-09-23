@@ -1,7 +1,12 @@
 import pytest
 
 from inaptas.application.services import FiscalGatewayService
-from inaptas.domain.models import CadastroProviderResult, FiscalStatusProviderResult, ProviderStatus
+from inaptas.domain.models import (
+    CadastroProviderResult,
+    FiscalStatusProviderResult,
+    PgfnProviderResult,
+    ProviderStatus,
+)
 from inaptas.infrastructure.providers.disabled import (
     DisabledFiscalStatusProvider,
     DisabledPgfnProvider,
@@ -51,11 +56,20 @@ class FiscalIndisponivel:
         )
 
 
+class PgfnComDivida:
+    async def consultar(self, cnpj: str) -> PgfnProviderResult:
+        return PgfnProviderResult(
+            provider="SERPRO_PGFN_TRIAL",
+            status=ProviderStatus.OK,
+            source_data={"has_active_debt": True, "debts": [{"document": "ficticio"}]},
+        )
+
+
 @pytest.mark.asyncio
 async def test_consulta_cadastral_produz_resposta_canonica() -> None:
     servico = FiscalGatewayService(
         cadastro_provider=CadastroFalso(),
-        pgfn_provider=ProviderDesabilitado("PGFN"),
+        pgfn_provider=PgfnComDivida(),
         fiscal_status_provider=ProviderDesabilitado("FISCAL"),
     )
 
@@ -64,7 +78,9 @@ async def test_consulta_cadastral_produz_resposta_canonica() -> None:
     assert resposta.cnpj == "11222333000181"
     assert resposta.company.legal_name == "EMPRESA TESTE"
     assert resposta.system_diagnosis.registration == "ACTIVE"
-    assert resposta.pgfn.has_active_debt is None
+    assert resposta.pgfn.has_active_debt is True
+    assert resposta.system_diagnosis.pgfn == "ACTIVE_DEBT_RETURNED_BY_SOURCE"
+    assert [fonte.provider for fonte in resposta.sources] == ["FAKE", "SERPRO_PGFN_TRIAL"]
 
 
 @pytest.mark.asyncio

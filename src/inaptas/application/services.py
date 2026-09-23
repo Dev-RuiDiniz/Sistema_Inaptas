@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from inaptas.application.ports import (
@@ -101,8 +102,11 @@ class FiscalGatewayService:
 
     async def consultar_cadastro(self, cnpj: str) -> FiscalResponse:
         cnpj_normalizado = normalizar_cnpj(cnpj)
-        cadastro = await self.cadastro_provider.consultar(cnpj_normalizado)
-        return _resposta_canonica(cnpj_normalizado, cadastro=cadastro)
+        cadastro, pgfn = await asyncio.gather(
+            self.cadastro_provider.consultar(cnpj_normalizado),
+            self.pgfn_provider.consultar(cnpj_normalizado),
+        )
+        return _resposta_canonica(cnpj_normalizado, cadastro=cadastro, pgfn=pgfn)
 
     async def consultar_pgfn(self, cnpj: str) -> FiscalResponse:
         cnpj_normalizado = normalizar_cnpj(cnpj)

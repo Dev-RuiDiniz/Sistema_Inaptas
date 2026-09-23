@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     portal_transparencia_timeout_seconds: float = 5.0
     portal_transparencia_max_retries: int = 2
     portal_transparencia_max_pages: int = 10
+    pgfn_provider: str = "disabled"
+    serpro_divida_ativa_base_url: str = "https://gateway.apiserpro.serpro.gov.br"
+    serpro_divida_ativa_trial_token: str = ""
+    serpro_divida_ativa_timeout_seconds: float = 5.0
+    serpro_divida_ativa_max_retries: int = 2
     whatsapp_verify_token: str = ""
     whatsapp_app_secret: str = ""
     whatsapp_access_token: str = ""
@@ -109,6 +114,23 @@ def validar_configuracao(settings: Settings) -> None:
         raise ConfiguracaoInseguraError(
             "PORTAL_TRANSPARENCIA_API_TOKEN deve ser definido quando o provider estiver ativo"
         )
+    provedor_pgfn = settings.pgfn_provider.strip().lower()
+    if provedor_pgfn not in {"disabled", "serpro_trial"}:
+        raise ConfiguracaoInseguraError(
+            "PGFN_PROVIDER deve ser disabled ou serpro_trial"
+        )
+    if settings.serpro_divida_ativa_timeout_seconds <= 0:
+        raise ConfiguracaoInseguraError(
+            "SERPRO_DIVIDA_ATIVA_TIMEOUT_SECONDS deve ser maior que zero"
+        )
+    if settings.serpro_divida_ativa_max_retries < 0:
+        raise ConfiguracaoInseguraError(
+            "SERPRO_DIVIDA_ATIVA_MAX_RETRIES nao pode ser negativo"
+        )
+    if provedor_pgfn == "serpro_trial" and not settings.serpro_divida_ativa_trial_token:
+        raise ConfiguracaoInseguraError(
+            "SERPRO_DIVIDA_ATIVA_TRIAL_TOKEN deve ser definido quando o provider estiver ativo"
+        )
     if settings.app_env.lower() not in {"prod", "production"}:
         return
     if (
@@ -119,6 +141,13 @@ def validar_configuracao(settings: Settings) -> None:
             "PORTAL_TRANSPARENCIA_BASE_URL deve usar HTTPS em producao"
         )
         return
+    if (
+        provedor_pgfn == "serpro_trial"
+        and not settings.serpro_divida_ativa_base_url.lower().startswith("https://")
+    ):
+        raise ConfiguracaoInseguraError(
+            "SERPRO_DIVIDA_ATIVA_BASE_URL deve usar HTTPS em producao"
+        )
     if not settings.internal_api_token or settings.internal_api_token == TOKEN_LOCAL_PADRAO:
         raise ConfiguracaoInseguraError("INTERNAL_API_TOKEN deve ser definido em produção")
     if (

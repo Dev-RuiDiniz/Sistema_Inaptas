@@ -35,6 +35,39 @@ def test_configuracao_portal_transparencia_rejeita_limites_invalidos(
         validar_configuracao(Settings(**{campo: valor}))
 
 
+@pytest.mark.parametrize(
+    ("campo", "valor", "mensagem"),
+    [
+        ("serpro_divida_ativa_timeout_seconds", 0, "TIMEOUT_SECONDS"),
+        ("serpro_divida_ativa_max_retries", -1, "MAX_RETRIES"),
+    ],
+)
+def test_configuracao_serpro_rejeita_limites_invalidos(
+    campo: str, valor: int, mensagem: str
+) -> None:
+    with pytest.raises(ConfiguracaoInseguraError, match=mensagem):
+        validar_configuracao(Settings(**{campo: valor}))
+
+
+def test_producao_rejeita_url_serpro_sem_https() -> None:
+    settings = Settings(
+        app_env="production",
+        pgfn_provider="serpro_trial",
+        serpro_divida_ativa_trial_token="token-sintetico",
+        serpro_divida_ativa_base_url="http://serpro.test",
+        internal_api_token="token-producao-seguro",
+        orchestrator_api_token="token-orquestrador-seguro",
+        n8n_internal_webhook_url="https://n8n.exemplo/webhook/inaptas",
+        n8n_internal_webhook_token="token-n8n-seguro",
+        n8n_encryption_key="chave-n8n-segura",
+        openapi_enabled=False,
+        trusted_hosts=["api.exemplo.com"],
+    )
+
+    with pytest.raises(ConfiguracaoInseguraError, match="SERPRO_DIVIDA_ATIVA_BASE_URL"):
+        validar_configuracao(settings)
+
+
 def test_producao_rejeita_token_interno_padrao() -> None:
     settings = Settings(
         app_env="production",

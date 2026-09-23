@@ -4,6 +4,9 @@ from inaptas.config import ConfiguracaoInseguraError, Settings, validar_configur
 from inaptas.infrastructure.providers.minha_receita import MinhaReceitaProvider
 from inaptas.infrastructure.providers.portal_transparencia import PortalTransparenciaProvider
 from inaptas.infrastructure.providers.receitaws import ReceitaWsProvider
+from inaptas.infrastructure.providers.serpro_divida_ativa import (
+    SerproDividaAtivaTrialProvider,
+)
 from inaptas.interfaces.http.dependencies import criar_servico
 
 
@@ -58,3 +61,27 @@ def test_rejeita_compliance_desconhecido_e_ausencia_de_token() -> None:
         validar_configuracao(Settings(compliance_provider="desconhecido"))
     with pytest.raises(ConfiguracaoInseguraError, match="PORTAL_TRANSPARENCIA_API_TOKEN"):
         validar_configuracao(Settings(compliance_provider="portal_transparencia"))
+
+
+def test_pgfn_fica_desabilitado_por_padrao() -> None:
+    servico = criar_servico(Settings())
+
+    assert servico.pgfn_provider.__class__.__name__ == "DisabledPgfnProvider"
+
+
+def test_seleciona_serpro_trial_por_configuracao() -> None:
+    servico = criar_servico(
+        Settings(
+            pgfn_provider="serpro_trial",
+            serpro_divida_ativa_trial_token="token-sintetico",
+        )
+    )
+
+    assert isinstance(servico.pgfn_provider, SerproDividaAtivaTrialProvider)
+
+
+def test_rejeita_pgfn_desconhecido_e_ausencia_de_token() -> None:
+    with pytest.raises(ConfiguracaoInseguraError, match="PGFN_PROVIDER"):
+        validar_configuracao(Settings(pgfn_provider="desconhecido"))
+    with pytest.raises(ConfiguracaoInseguraError, match="SERPRO_DIVIDA_ATIVA_TRIAL_TOKEN"):
+        validar_configuracao(Settings(pgfn_provider="serpro_trial"))

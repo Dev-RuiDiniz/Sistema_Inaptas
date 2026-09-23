@@ -90,6 +90,24 @@ headers, payload ou credenciais. Os registros retornados são sanções ou
 impedimentos publicados, não dívida, certidão ou prova de regularidade fiscal.
 Homologue somente com CNPJ autorizado e fora do Git.
 
+## SERPRO Consulta Dívida Ativa trial
+
+O conector trial deve permanecer desabilitado fora da homologação controlada.
+Quando autorizado, configure no secret manager do Gateway:
+
+```text
+PGFN_PROVIDER=serpro_trial
+SERPRO_DIVIDA_ATIVA_BASE_URL=https://gateway.apiserpro.serpro.gov.br
+SERPRO_DIVIDA_ATIVA_TRIAL_TOKEN=<secret-trial-novo>
+```
+
+O token nunca deve ser enviado ao n8n, Ollama, frontend ou logs. Nesta fase, o
+endpoint SERPRO recebe sempre o CPF fictício `09781911768`; seu retorno não
+representa o CNPJ informado ao Inaptas. A migração para documento dinâmico e a
+geração OAuth2 do token oficial são tasks distintas, bloqueadas até a contratação
+e validação do contrato vigente. A reversão consiste em definir
+`PGFN_PROVIDER=disabled` e reiniciar o Gateway.
+
 ## Backups, retenção e auditoria
 
 Faça backup criptografado e testado de:
