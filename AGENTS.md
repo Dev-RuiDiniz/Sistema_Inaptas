@@ -11,6 +11,8 @@ Este arquivo é a constituição operacional do repositório. Todo agente deve l
 - Specs históricas preservam contexto e evidências, mas não substituem a spec-mãe vigente. Divergências devem ser registradas e resolvidas na spec-mãe antes de implementar.
 - Em qualquer conflito material, parar, registrar a divergência e pedir confirmação antes de mudar comportamento.
 - Nenhum secret, token, certificado, chave privada, dado fiscal real, CNPJ real ou credencial pode ser gravado no repositório.
+- `ACESSOS.md` é somente um inventário de sistemas, responsáveis, status e próximos passos. Nunca armazene nele senhas, tokens, chaves, certificados ou códigos de recuperação; use o cofre da empresa.
+- Se uma credencial aparecer em conversa, áudio, imagem, arquivo ou log, não a reproduza em documentação, commit, terminal de saída ou resposta. Considere-a exposta e registre apenas a necessidade de revogação/rotação.
 
 ## 2. Método SDD obrigatório
 
@@ -86,6 +88,8 @@ Nenhuma task pode ser marcada como concluída apenas porque o código compila ou
 - `ROADMAP.md`: tarefas, estados, dependências, bloqueios, evidências e próximos marcos.
 - `MEMORY.md`: estado persistente, decisões, riscos e histórico cronológico append-only.
 - `README.md`: entrada comercial e técnica para equipe, cliente e agentes.
+- `FLUXOGRAMA.md`: visão visual dos caminhos de consulta e dos estados implementado, pendente e futuro.
+- `ACESSOS.md`: inventário seguro de contas e dependências externas, sem valores de credenciais.
 - `escopo_tecnico_inaptas_regularizabr_atualizado.md`: origem técnica; mudanças exigem rastreabilidade e revisão.
 
 Qualquer alteração relevante em requisitos, decisão, risco, status, teste, dependência ou homologação exige atualização obrigatória do roadmap e da memória no mesmo ciclo documental.

@@ -1,8 +1,8 @@
 # PRD — Sistema Inaptas
 
-**Versão:** 1.0
-**Status:** aprovado para início do MVP
-**Data-base:** 20/08/2026
+**Versão:** 1.1
+**Status:** MVP técnico em homologação; produção bloqueada por dependências externas
+**Atualizado em:** 08/10/2026
 **Fonte:** `escopo_tecnico_inaptas_regularizabr_atualizado.md`
 
 ## 1. Resumo do produto
@@ -21,11 +21,19 @@ O público inicial é:
 - profissionais autorizados a consultar empresas;
 - clientes do escritório que solicitam uma verificação pelo WhatsApp.
 
+No áudio de 19/08/2026, o cliente explicou que o site `inaptas.com.br` capta
+leads e que o BotConversa já é usado no atendimento de pré-venda. A necessidade
+é ajudar a triagem com dados consultados e explicações, encaminhando os casos
+que exigem uma pessoa. Site e BotConversa são ativos externos a este
+repositório; a integração ainda precisa de decisão, especificação e
+homologação.
+
 ## 3. Objetivos e resultado esperado
 
 ### Objetivos do MVP
 
 - Automatizar o recebimento de solicitações pelo WhatsApp.
+- Apoiar a pré-venda dos leads com consultas autorizadas e encaminhamento humano quando necessário.
 - Validar CNPJs numéricos e alfanuméricos.
 - Consultar dados cadastrais e indicadores de Simples Nacional/SIMEI quando a fonte fornecer.
 - Consultar PGFN quando o conector estiver habilitado e as credenciais forem válidas.
@@ -53,13 +61,15 @@ Uma POC autorizada deve demonstrar `CNPJ → Fiscal Gateway → fonte disponíve
 - Preparação para histórico de inclusão/exclusão de Simples Nacional e SIMEI/MEI, sem inferência de datas ausentes.
 - Separação explícita entre `source_data`, `system_diagnosis` e `ai_interpretation`.
 - Auditoria, correlation ID, cache, rate limit, healthcheck e tratamento seguro de indisponibilidade.
+- Consulta opcional de registros CEIS, CNEP e CEPIM pela fonte Portal da Transparência, sempre identificada como compliance e separada de PGFN/CND.
 - Docker/Compose, documentação e POC de homologação.
 
 ### Preparado, mas fora da implementação completa do MVP
 
 - Integra Contador/SITFIS, incluindo fluxo assíncrono e leitura de PDF.
 - Pendências fiscais detalhadas protegidas.
-- ADE/Editais por fonte oficial e sustentável.
+- ADE/Editais por fonte oficial e sustentável. Em 17/09/2026 foi aprovada como direção a importação de publicações estruturadas do DOU/INLABS para localizar ADEs; essa ingestão ainda não foi implementada.
+- Integração do site/BotConversa ao Gateway, depois de definir o canal, a passagem de lead e o encaminhamento para atendimento humano.
 - Histórico fiscal quando uma fonte autorizada o disponibilizar.
 
 ### Fora do escopo
@@ -70,12 +80,15 @@ Uma POC autorizada deve demonstrar `CNPJ → Fiscal Gateway → fonte disponíve
 - Inferência de Lucro Real, Lucro Presumido ou outro regime sem fonte oficial/autorizada.
 - Garantia de disponibilidade ou funcionamento indefinido de serviços de terceiros.
 - Custos de APIs, certificados, hospedagem, Meta/WhatsApp, n8n, Ollama/LLM, domínio, backups e demais serviços externos.
+- Construção ou manutenção do site `inaptas.com.br`; o áudio o descreve como canal existente, mas o repositório não contém o site.
+- Integração BotConversa: o cliente relata que já usa a plataforma, mas a conexão ao Gateway não existe no código e ainda depende de uma spec e da decisão entre o fluxo atual Meta + n8n e a integração com o BotConversa.
 
 ## 5. Fluxo principal
 
+### Caminho que o código implementa
+
 ```text
-Cliente
-  → WhatsApp
+WhatsApp Business Cloud API
   → Fiscal Gateway valida assinatura e idempotência
   → n8n identifica intenção e solicita CNPJ
   → Fiscal Gateway valida e normaliza o CNPJ
@@ -87,6 +100,17 @@ Cliente
 ```
 
 O backend valida assinatura do webhook, deduplica eventos, aplica rate limit, controla credenciais, registra auditoria e converte retornos externos para um contrato único.
+
+O site e o BotConversa são canais externos ao repositório. O caminho Meta + n8n
+é o que está implementado no código; conectar o canal de pré-venda já usado
+pelo cliente ainda depende de especificação e homologação.
+
+### Caminho comercial existente e integração desejada
+
+```text
+Site inaptas.com.br → BotConversa → pré-venda e, quando necessário, equipe humana
+                              └ → Fiscal Gateway (ligação ainda não implementada)
+```
 
 ## 6. Requisitos funcionais
 
@@ -108,6 +132,7 @@ O backend valida assinatura do webhook, deduplica eventos, aplica rate limit, co
 - **RF16:** tornar webhooks idempotentes e resistentes à duplicidade.
 - **RF17:** trocar fornecedor por configuração/conector sem reconstruir a aplicação.
 - **RF18:** ativar ou desativar fontes de forma controlada.
+- **RF19:** consultar CEIS, CNEP e CEPIM por provider opcional, sem apresentar esses registros como dívida ou certidão fiscal.
 
 ## 7. Requisitos não funcionais
 
@@ -181,10 +206,18 @@ O Fiscal Gateway nunca deve enviar ao n8n ou ao Ollama respostas brutas e incomp
 | WhatsApp Business Cloud API | Canal de entrada/saída | Oficial, com webhook validado |
 | n8n self-hosted | Workflow, conversa e integração com Gateway/WhatsApp | Sem credenciais fiscais de providers; webhook interno autenticado |
 | Ollama local | Interpretação textual opcional | Recebe contrato canônico mínimo; fallback determinístico em indisponibilidade |
-| ReceitaWS | Fonte cadastral de baixo atrito | Alternativa de MVP; não é fonte oficial |
+| BotConversa | Canal de pré-venda já usado pelo cliente, segundo áudio de 19/08 | Ainda não integrado; especificar sua ligação ao Gateway antes de alterar a arquitetura atual Meta + n8n |
+| Minha Receita | Fonte cadastral self-hosted | Snapshot público com atualização periódica; exige carga e cerca de 180 GB na carga inicial |
+| ReceitaWS | Fonte cadastral de baixo atrito | Alternativa selecionável; não é fonte oficial e não há confirmação de contratação comercial |
 | SERPRO Consulta CNPJ | Cadastro oficial | Preferencial em produção quando contratado |
-| SERPRO/PGFN | Dívida Ativa da União | Depende de contrato e autenticação |
+| SERPRO/PGFN | Dívida Ativa da União | Conector de trial disponível e desativado por padrão; produção depende de contrato e autenticação |
+| Portal da Transparência | Registros CEIS, CNEP e CEPIM | Provider separado e opcional; não é dívida PGFN, CND nem prova de regularidade fiscal |
 | Integra Contador/SITFIS | Situação fiscal protegida | Extensão futura, depende de autorização |
+| DOU/INLABS | Publicações estruturadas como fonte possível para ADE | Direção aprovada em 17/09; ingestão ainda não implementada |
+
+O Dify constava na proposta inicial, mas o repositório atual usa n8n self-hosted
+e Ollama local. Essa é a arquitetura documentada e implementada até que o
+responsável do produto aprove outra decisão.
 
 O endpoint produtivo do SERPRO deve ser o vigente no contrato/Swagger do cliente. Endpoints de trial ou documentação não devem ser tratados como garantia de produção.
 
@@ -246,7 +279,43 @@ Os riscos principais são acesso ao SERPRO, procuração fiscal, mudanças de AP
 
 O valor comercial de R$ 2.500,00 contempla o desenvolvimento do MVP, Fiscal Gateway, workflow WhatsApp/n8n, consulta cadastral, arquitetura modular, normalização, regras determinísticas, preparação para PGFN/SITFIS/ADE, implantação, documentação e POC. Serviços, contratos, credenciais e custos de terceiros ficam fora do desenvolvimento.
 
-## 14. Gestão de mudanças
+### Estimativas SERPRO registradas na conversa
+
+Em 17/09/2026 foram compartilhadas estimativas mensais de consumo, sem proposta
+comercial anexada:
+
+| Volume | CNPJ + PGFN + CND | CNPJ + PGFN, sem CND |
+|---:|---:|---:|
+| 1.000 consultas | ~R$ 1.680/mês | ~R$ 840/mês |
+| 10.000 consultas | ~R$ 12.900/mês | ~R$ 5.000/mês |
+| 100.000 consultas | ~R$ 88.000/mês | ~R$ 26.000/mês |
+
+São números informais registrados na conversa, não preços confirmados pelo
+SERPRO. Devem ser revalidados diretamente no produto e contrato vigentes antes
+da compra. A conversa destacou a CND como a maior parcela do custo e sugeriu
+consultá-la apenas quando o caso exigir.
+
+## Estado operacional em 08/10/2026 e decisões posteriores
+
+- Em 29/09/2026 a equipe relatou que uma integração de teste SERPRO havia
+  funcionado; o registro não identifica o produto, o ambiente ou a evidência.
+- Em 06/10/2026 o contratante informou que ainda não havia contratado o
+  SERPRO. A integração produtiva permanece pendente.
+- O repositório agora contém um conector `serpro_trial` para PGFN. Ele chama um
+  documento de teste fixo e **não consulta o CNPJ informado**; o padrão é
+  `PGFN_PROVIDER=disabled`. Use somente para homologação, nunca para responder
+  sobre dívida de uma empresa real.
+- Em 17/09/2026 foi aprovada a direção de usar dados estruturados do DOU/INLABS
+  para localizar ADEs. O desenvolvimento e a validação dessa ingestão são
+  pendências de roadmap. Não contornar CAPTCHA nem automatizar login no e-CAC.
+- O áudio de 19/08 relata que o site da Inaptas capta leads e que o BotConversa
+  já conduz a pré-venda. O acesso foi compartilhado em texto em 06/10; a senha
+  deve ser trocada e as sessões revogadas. Não foi copiada para este PRD nem
+  para o repositório.
+- A produção ainda depende de Meta/WhatsApp, n8n, OIDC, fonte cadastral,
+  infraestrutura, autorizações e POC com CNPJ autorizado.
+
+## 15. Gestão de mudanças
 
 O PRD representa o escopo fechado do MVP. Qualquer mudança que altere comportamento, contrato, risco, integração ou critério de aceite deve:
 
@@ -255,10 +324,12 @@ O PRD representa o escopo fechado do MVP. Qualquer mudança que altere comportam
 3. ser aprovada antes da implementação;
 4. atualizar `MEMORY.md` quando mudar uma decisão ou o estado operacional.
 
-## 15. Documentos relacionados
+## 16. Documentos relacionados
 
 - [Instruções dos agentes](AGENTS.md)
 - [Memória persistida](MEMORY.md)
 - [Roadmap](ROADMAP.md)
 - [Fluxo de specs](specs/README.md)
 - [Escopo técnico de origem](escopo_tecnico_inaptas_regularizabr_atualizado.md)
+- [Fluxograma do sistema](FLUXOGRAMA.md)
+- [Inventário seguro de acessos](ACESSOS.md)

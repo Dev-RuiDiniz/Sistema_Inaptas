@@ -159,14 +159,15 @@ consultada.
 - Risco principal: o trial devolve dívida de uma pessoa fictícia diferente da
   empresa consultada. A resposta deve ser identificada como trial e não pode ser
   exibida como dívida do CNPJ solicitado em produção.
-- Decisão pendente de aprovação: incorporar o trial ao `lookup` por configuração,
-  mantendo `disabled` como padrão seguro.
+- Decisão: incorporar o trial ao `lookup` por configuração foi aprovado e
+  implementado; `disabled` permanece como padrão seguro.
 
 ## DoR, DoD, rollout e reversão
 
 O conteúdo técnico, critérios, testes, riscos e dependências estão definidos. O
-DoR somente será completado após aprovação explícita desta spec. Depois disso, a
-spec transita para `APROVADA` e `EM_IMPLEMENTAÇÃO` antes de qualquer código.
+DoR foi completado com a aprovação explícita registrada em 22/09/2026. A spec
+transitou por `APROVADA` e `EM_IMPLEMENTAÇÃO` antes do código; permanece em
+`EM_HOMOLOGAÇÃO` porque depende de token trial novo e de validação externa.
 
 O DoD exige implementação, testes e verificações aprovados, documentação
 atualizada, revisão de segurança/LGPD, diff restrito, ausência de secrets e commit

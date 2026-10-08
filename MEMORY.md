@@ -194,3 +194,12 @@ n8n e Ollama não recebem diretamente credenciais fiscais. O Gateway controla au
 - O bearer compartilhado na conversa foi tratado como credencial exposta: não foi gravado no repositório e deve ser revogado/substituído antes da homologação.
 - Após aprovação explícita, a spec transitou por `APROVADA` e `EM_IMPLEMENTAÇÃO` até `EM_HOMOLOGAÇÃO`. O provider trial, a composição concorrente no `lookup`, a seleção segura por configuração e os testes foram implementados.
 - A validação em Python 3.12 resultou em 130 testes aprovados e 1 integração pulada; Ruff, MyPy e Alembic passaram. A homologação externa permanece pendente de um token trial novo injetado fora do Git.
+
+### 08/10/2026 — consolidação do projeto e atualização do estado
+
+- A conversa do projeto confirma que, em 17/09, foi aprovada a direção de localizar ADEs por publicações estruturadas do DOU/INLABS; o cliente também recebeu estimativas SERPRO por volume, ainda sem proposta formal. Os valores estão anotados no PRD como estimativas históricas, não como tabela vigente.
+- Em 29/09 a equipe relatou um teste SERPRO bem-sucedido, sem identificar serviço, ambiente ou evidência. Em 06/10 o contratante informou que a contratação SERPRO ainda não havia sido feita. A integração produtiva segue não homologada.
+- Em 06/10 foi compartilhado em texto o acesso de uma conta BotConversa. Nenhum valor de credencial foi copiado. A senha deve ser rotacionada e as sessões revogadas; o papel do BotConversa em relação ao canal Meta + n8n permanece pendente.
+- A branch `feature/implementacao-serpro` foi integrada à `main` por fast-forward, preservando o commit `f4ef68c`. O conector PGFN trial fica desligado por padrão e consulta um CPF de teste fixo, não o CNPJ recebido; não pode ser apresentado como consulta de dívida da empresa.
+- Foram consolidados `FLUXOGRAMA.md` e `ACESSOS.md` e atualizados README, PRD, AGENTS, roadmap e índice de specs para refletir o estado real e simplificar a execução local.
+- Nenhuma senha, token, certificado, dado fiscal ou CNPJ real foi incluído. Os testes não foram reexecutados nesta atualização documental; os resultados da spec de 22/09 são históricos.

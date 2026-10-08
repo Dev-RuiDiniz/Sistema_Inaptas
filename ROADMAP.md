@@ -25,7 +25,22 @@ O MVP operacional é composto por:
 
 Referências: [`PRD.md`](PRD.md), [spec-mãe](specs/2026-08-21-mvp-inaptas-especificacao-mae.md) e [`MEMORY.md`](MEMORY.md).
 
-## Estado real em 15/09/2026
+## Estado atual em 08/10/2026
+
+| Frente | Estado | Evidência e próximo passo |
+|---|---|---|
+| Gateway, painel e providers | Implementados tecnicamente | Continuam sujeitos à homologação no ambiente do cliente. A auditoria de 15/09 é histórica. |
+| SERPRO PGFN trial | Código incorporado à `main` em 08/10 | O provider usa um documento de teste fixo, não o CNPJ consultado, e permanece `disabled` por padrão. Não serve para produção. Os testes registrados na spec não foram repetidos neste ciclo. |
+| SERPRO oficial / contratação | Pendente externo | Em 29/09 foi relatado um teste que funcionou, sem identificação de serviço ou evidência. Em 06/10 o contrato ainda não havia sido feito. |
+| Meta/WhatsApp, BotConversa e n8n | Pendente de definição e E2E | O cliente relata que BotConversa já é usado na pré-venda, mas ele não está integrado ao código. O workflow n8n segue inativo. Definir qual caminho ligar ao Gateway. |
+| ADE | Direção aprovada; implementação pendente | Em 17/09 foi aprovado usar publicações estruturadas do DOU/INLABS. Definir ingestão, atualização e correspondência com CNPJ; não contornar CAPTCHA. |
+| Contas e segredos | Requer ação do contratante | Uma senha BotConversa foi compartilhada em texto na conversa exportada. Trocar, revogar sessões e ativar MFA; não copiar valores para o Git. |
+| Produção | Bloqueada | Faltam infraestrutura e domínio do cliente, integrações externas homologadas, autorizações e POC com CNPJ autorizado. |
+
+O inventário de dependências e responsáveis está em [`ACESSOS.md`](ACESSOS.md); a
+visão dos caminhos está em [`FLUXOGRAMA.md`](FLUXOGRAMA.md).
+
+## Estado real em 15/09/2026 — registro histórico
 
 | Dimensão | Estado | Evidência ou bloqueio |
 |---|---|---|
@@ -116,7 +131,11 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 | `TASK-MINHA-RECEITA-001` | Integrar provider cadastral Minha Receita | provider, seleção, Compose, carga e documentação | `[x]` implementação técnica concluída; homologação externa pendente | branch `funcionalidade/minha-receita` |
 | `TASK-PORTAL-TRANSPARENCIA-001` | Integrar compliance do Portal da Transparência | CEIS/CNEP/CEPIM, rota, full-check, painel, relatórios e operação | `[-]` implementação técnica concluída; em homologação externa | branch `funcionalidade/portal-transparencia` |
 | `TASK-AUDITORIA-ESTADO-REAL` | Auditar e registrar o estado real do projeto | `RELATORIO_AUDITORIA_ESTADO_REAL.md`, README, roadmap e memória | `[x]` concluída em 15/09/2026 | commit desta auditoria |
-| `TASK-SERPRO-001` | Integrar Consulta Dívida Ativa no ambiente trial | provider trial, `lookup`, normalização, configuração e testes | `[-]` implementação técnica concluída; homologação externa pendente | commit desta tarefa |
+| `TASK-ADE-001` | Importar publicações estruturadas DOU/INLABS para localizar ADE | Ingestão, atualização e correspondência auditável por CNPJ | `[ ]` direção aprovada em 17/09; detalhamento e implementação pendentes | — |
+| `TASK-CANAL-001` | Fechar canal de atendimento | Especificar conexão do BotConversa já usado pelo cliente ou seguir com Meta + n8n (código atual) | `[!]` decisão externa pendente | — |
+| `TASK-ACESSOS-001` | Rotacionar credencial BotConversa compartilhada em texto | Troca de senha, revogação de sessões e MFA | `[!]` ação do titular da conta | — |
+| `TASK-DOCS-001` | Consolidar documentos operacionais e de execução | PRD, README, AGENTS, roadmap, fluxograma e inventário seguro | `[x]` concluída nesta execução | commit desta consolidação |
+| `TASK-SERPRO-001` | Integrar Consulta Dívida Ativa no ambiente trial | provider trial, `lookup`, normalização, configuração e testes | `[x]` implementação; `[!]` homologação externa pendente | `f4ef68c` |
 | `TASK-SERPRO-002` | Remover o CPF fictício fixo e usar documento dinâmico | endpoint oficial recebendo o documento normalizado | `[!]` aguarda contrato e validação do endpoint oficial | pendente |
 | `TASK-SERPRO-003` | Implementar geração e renovação do token oficial | OAuth2 `client_credentials`, cache e renovação segura | `[!]` aguarda contrato, documentação e credenciais | pendente |
 | `TASK-SERPRO-004` | Homologar Consulta Dívida Ativa oficial | POC autorizada e evidência sanitizada | `[!]` aguarda contratação e CNPJ autorizado | pendente |
@@ -139,6 +158,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 
 - [ ] Confirmar conta Meta Business e permissões administrativas.
 - [ ] Confirmar número e credenciais da WhatsApp Business Cloud API.
+- [ ] Decidir se BotConversa participa ou substitui Meta + n8n; não configurar integração paralela antes da decisão.
 - [ ] Confirmar VPS, domínio, workflow n8n, modelo Ollama e credenciais do contratante.
 - [ ] Confirmar fonte cadastral do MVP, começando por ReceitaWS se contratada.
 - [ ] Confirmar e-CNPJ, contrato SERPRO e credenciais de homologação, quando aplicável.
@@ -146,6 +166,7 @@ Checklist: pytest/Ruff/MyPy/Alembic/scanner; Docker Compose; LGPD e autorizaçã
 - [ ] Confirmar procurações ou autorizações necessárias para dados fiscais protegidos.
 - [ ] Definir CNPJ de teste autorizado para a POC sem armazená-lo no Git.
 - [ ] Registrar titularidade de contas e ativos em nome do contratante.
+- [ ] Rotacionar credenciais compartilhadas em texto e registrar somente status no `ACESSOS.md`.
 - [ ] Confirmar issuer OIDC, client, callbacks, grupos e política de retenção do cliente.
 
 **Critério de aceite:** cada dependência possui responsável, estado, evidência segura ou bloqueio documentado; não há secret no Git; existe autorização para demonstrar `CNPJ → Fiscal Gateway → fonte → retorno estruturado`.
@@ -196,11 +217,12 @@ O relatório [`RELATORIO_AUDITORIA_ESTADO_REAL.md`](RELATORIO_AUDITORIA_ESTADO_R
 
 ## Fase 2 — Integrações oficiais SERPRO/PGFN
 
-**Estado:** pendente externo e de implementação condicionada.
+**Estado:** provider de trial implementado; integração oficial e homologação pendentes.
 
 **Spec em homologação:** [`specs/2026-09-22-integracao-serpro-divida-ativa-trial.md`](specs/2026-09-22-integracao-serpro-divida-ativa-trial.md). O incremento inicial usa somente o CPF fictício do trial, por configuração e sem associar sua dívida ao CNPJ consultado. A implementação e os testes locais foram concluídos; a chamada externa aguarda um token trial novo no ambiente autorizado.
 
-- [-] Integrar o ambiente trial ao `POST /v1/company/lookup` com CPF fictício fixo, provider desabilitado por padrão e token fora do Git — implementação local concluída; homologação externa pendente.
+- [x] Integrar o ambiente trial ao `POST /v1/company/lookup` com CPF fictício fixo, provider desabilitado por padrão e token fora do Git — código em `main`; homologação externa pendente.
+- [ ] Revogar credencial trial que tenha sido compartilhada e emitir outra somente para homologação controlada.
 - [ ] Remover o CPF fictício e usar documento dinâmico após contratação e validação do endpoint oficial.
 - [ ] OAuth2 `client_credentials` conforme contrato autorizado, com cache e renovação segura.
 - [ ] Consulta CNPJ oficial SERPRO conforme Swagger vigente.
@@ -219,6 +241,7 @@ O relatório [`RELATORIO_AUDITORIA_ESTADO_REAL.md`](RELATORIO_AUDITORIA_ESTADO_R
 - [ ] Normalização de pendências e obrigações com regressão do parser.
 - [ ] Autorização/procuração e bloqueio sem vínculo válido.
 - [ ] Fila e observabilidade do processamento.
+- [ ] Especificar e implementar a ingestão de publicações estruturadas DOU/INLABS para ADE, com correspondência por CNPJ, atualização e auditoria. Direção aprovada em 17/09/2026.
 
 ## Fase 4 — Regulariza.br e expansão modular
 
@@ -264,6 +287,11 @@ O relatório [`RELATORIO_AUDITORIA_ESTADO_REAL.md`](RELATORIO_AUDITORIA_ESTADO_R
 | 21/08/2026 | Spec-mãe e histórico consolidados | `specs/2026-08-21-mvp-inaptas-especificacao-mae.md` e índice | `EM_IMPLEMENTAÇÃO`/histórico em `EM_HOMOLOGAÇÃO` |
 | 22/08/2026 | Validação técnica da migração | 73 testes, 1 integração pulada, Ruff, MyPy, Alembic, scanner e Compose config | Stack n8n/Ollama pendente de pull |
 | 22/08/2026 | Correção do Swagger sob CSP | Spec de correção, teste RED/GREEN, Compose reconstruído e `/docs` HTTP 200 | Homologação visual pendente |
+| 17/09/2026 | Estimativas de custo SERPRO e direção para ADE | Conversa registra estimativas informais; cliente aprova seguir com dados estruturados DOU/INLABS | Preços a confirmar; ingestão ADE pendente |
+| 22/09/2026 | Provider SERPRO PGFN trial | Spec `2026-09-22-integracao-serpro-divida-ativa-trial.md`, código e testes na branch de integração | Trial apenas; documento fixo, desativado por padrão |
+| 29/09/2026 | Teste SERPRO relatado | Mensagem da equipe diz que o teste funcionou, sem identificar endpoint ou ambiente | Evidência insuficiente para marcar homologação |
+| 06/10/2026 | Contratação SERPRO e acesso BotConversa | Contratante informa que não contratou SERPRO; acesso BotConversa foi compartilhado por mensagem | Contrato pendente; credencial deve ser rotacionada |
+| 08/10/2026 | Integração da branch SERPRO em `main` | Fast-forward preservou o commit `f4ef68c`; provider trial integrado | Testes da branch não foram reexecutados nesta consolidação |
 
 ## Validação documental e técnica final
 
@@ -297,6 +325,13 @@ CEPIM por CNPJ. O resultado normalizado aparece em
 relatorios. O provider e `disabled` por padrao, nao usa fallback e nunca
 transforma ausencia de registros ou indisponibilidade em regularidade fiscal.
 DadosAPI e Confere CNPJ permanecem como integracoes futuras independentes.
+
+### Regra de atualização do estado
+
+Os resultados de 15/09/2026 e as validações históricas citadas acima não foram
+reexecutados nesta atualização. O provider PGFN trial foi integrado ao código,
+mas nenhuma consulta real, contratação SERPRO, integração Meta ou homologação
+de produção foi realizada nesta execução.
 - Cada tarefa deve apontar para arquivo, critério de aceite, evidência e commit individual.
 - Atualizar `MEMORY.md` junto com decisões, riscos, dependências, validações e homologações relevantes.
 - Separar sempre implementação técnica concluída, homologação externa pendente e produção bloqueada.

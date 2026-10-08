@@ -1,6 +1,6 @@
 # Inaptas — triagem cadastral e fiscal para escritórios
 
-O Inaptas organiza a primeira análise de uma empresa em um fluxo único: o cliente conversa pelo WhatsApp, o Gateway valida o evento, o n8n self-hosted conduz o workflow, o Fiscal Gateway consulta fontes habilitadas e o escritório acompanha evidências pelo painel operacional.
+O Inaptas organiza a primeira análise de uma empresa: o lead chega pelo site ou atendimento, o Fiscal Gateway valida o CNPJ, consulta as fontes habilitadas e o escritório acompanha as evidências pelo painel. O cliente relata que o site `inaptas.com.br` capta leads e que o BotConversa já conduz a pré-venda; a integração desses canais ao Gateway ainda não existe neste repositório.
 
 ## Posicionamento
 
@@ -31,13 +31,17 @@ O MVP centraliza o fluxo, registra fonte/status/horário, conserva o contexto da
 ## Fluxo comercial resumido
 
 ```text
-Cliente no WhatsApp
+Fluxo de pré-venda já usado pelo cliente:
+site inaptas.com.br → BotConversa → equipe humana quando necessário
+
+Fluxo previsto no código deste repositório:
+WhatsApp Cloud API → Fiscal Gateway → n8n (inativo)
   → Fiscal Gateway valida assinatura e idempotência
   → n8n self-hosted conduz o workflow
   → Fiscal Gateway consulta fontes habilitadas
   → normalização e diagnóstico rastreável
   → Ollama local gera interpretação opcional
-  → resposta explicada ao cliente
+  → resposta explicada e encaminhamento humano quando necessário
   → histórico, relatório e auditoria no painel do escritório
 ```
 
@@ -60,6 +64,37 @@ Cliente no WhatsApp
 - Auditoria mínima, retenção inicial de 90 dias, cache, rate limit, idempotência e logs redigidos.
 - Docker Compose, migrations, healthchecks, testes automatizados e documentação operacional.
 
+## Executar localmente pela primeira vez
+
+Este roteiro sobe o Gateway, PostgreSQL e Redis locais. Ele **não** configura
+Meta/WhatsApp, SERPRO, OIDC, nem consulta CNPJs reais.
+
+1. Instale e inicie o Docker Desktop.
+2. Abra o PowerShell na pasta do repositório.
+3. Rode:
+
+```powershell
+.\scripts\validar-local.ps1
+```
+
+O script cria um `.env` local se ele ainda não existir, sobe os serviços
+necessários, aplica as migrations e verifica a saúde e a autenticação da API.
+Depois, abra `http://localhost:8000/docs` para ver os endpoints e
+`http://localhost:8000/health` para conferir a saúde do Gateway.
+
+Para parar os serviços:
+
+```powershell
+docker compose down
+```
+
+Esse caminho é apenas para desenvolvimento. Não use credenciais de produção
+no `.env` local. A consulta local usa o provider configurado e pode ficar
+indisponível até a fonte cadastral estar carregada ou contratada. Para executar
+a stack completa, carregar os dados da Minha Receita ou preparar a VPS, siga o
+[guia de validação local](docs/operacao/validacao-local.md) e o
+[guia de implantação](docs/operacao/implantacao-vps-n8n.md).
+
 ## Benefícios para o escritório
 
 O escritório ganha um processo reproduzível para receber solicitações, acompanhar consultas, separar o que foi confirmado do que não pôde ser consultado e compartilhar um relatório com contexto. O painel também permite controlar quem acessa a informação e manter um histórico útil para atendimento e auditoria.
@@ -74,11 +109,31 @@ A disponibilidade, os limites de uso, a precisão e a vigência de dados de terc
 
 APIs, certificados, e-CNPJ, infraestrutura, Meta Business/WhatsApp, n8n, Ollama/LLM, ReceitaWS, SERPRO, PGFN, OIDC e demais serviços de terceiros são contratados e pagos pelo contratante. Homologações externas, operação contínua, alta disponibilidade, novos módulos e mudanças de escopo devem ser avaliados separadamente.
 
-## Status atual
+## Status atual — 08/10/2026
 
-O gateway e o painel estão implementados tecnicamente. Na auditoria de 15/09/2026, a suíte apresentou **110 testes aprovados, 1 integração pulada e 2 avisos**. Ruff, MyPy, Alembic e scanner de segurança passaram. O Docker não está instalado no ambiente auditado; por isso, o Compose, PostgreSQL/Redis reais e o fluxo ponta a ponta não foram homologados nesta execução.
+O Gateway, o painel e os providers cadastrais/compliance estão implementados no
+código. A branch de integração SERPRO foi incorporada à `main`: o conector
+PGFN de **trial** está disponível, mas desligado por padrão e consulta um CPF
+de teste fixo, não o CNPJ recebido. Ele não serve para consulta real de
+empresa. A consulta oficial PGFN ainda depende de contrato, credenciais novas,
+autorização e homologação.
 
-A produção continua bloqueada até a validação da infraestrutura, OIDC real, Meta/WhatsApp, n8n/Ollama, providers contratados, auditoria/retenção operacional e uma POC com CNPJ real autorizado. PGFN e SITFIS ainda estão representados por providers desabilitados, e o workflow n8n permanece inativo. Nenhuma credencial ou dado fiscal real é armazenado neste repositório.
+Em 29/09 a equipe relatou um teste SERPRO bem-sucedido, mas a conversa não
+identifica serviço, ambiente ou evidência técnica. Em 06/10 o contrato SERPRO
+ainda não havia sido feito. Portanto, não há homologação de produção
+confirmada. O mesmo vale para o canal: o workflow n8n segue inativo e a
+integração Meta/WhatsApp precisa de contas e configuração. O cliente relata que
+já usa BotConversa na pré-venda, mas essa plataforma ainda não está integrada
+ao código; é preciso especificar se ela será conectada ao Gateway ou se o
+atendimento seguirá pelo fluxo Meta + n8n existente no projeto.
+
+O projeto ainda está em homologação, não em produção. A auditoria técnica
+detalhada de 15/09/2026 está em
+[RELATORIO_AUDITORIA_ESTADO_REAL.md](RELATORIO_AUDITORIA_ESTADO_REAL.md); seus
+resultados de testes são históricos e não foram repetidos neste ciclo
+documental. Nenhuma credencial, senha ou dado fiscal real deve ser armazenado
+neste repositório. Veja o [inventário de acessos](ACESSOS.md) e o
+[fluxograma](FLUXOGRAMA.md) para entender dependências e próximos passos.
 
 ## Documentação do projeto
 
@@ -86,6 +141,8 @@ A produção continua bloqueada até a validação da infraestrutura, OIDC real,
 - [Memória operacional e histórico](MEMORY.md)
 - [PRD do produto](PRD.md)
 - [Roadmap, épicos, tarefas e evidências](ROADMAP.md)
+- [Fluxograma do sistema](FLUXOGRAMA.md)
+- [Inventário seguro de contas e acessos](ACESSOS.md)
 - [Spec-mãe do MVP público e painel](specs/2026-08-21-mvp-inaptas-especificacao-mae.md)
 - [Índice e histórico das specs](specs/README.md)
 - [Validação e operação local](docs/operacao/validacao-local.md)
